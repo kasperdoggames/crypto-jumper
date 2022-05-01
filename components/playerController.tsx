@@ -4,7 +4,7 @@ import { StateMachine } from "./StateMachine";
 export class PlayerController {
   sprite!: Phaser.Physics.Matter.Sprite;
   stateMachine!: StateMachine;
-  speed = 10;
+  speed = 8;
   jumpSpeed = -25;
   controls: Phaser.Types.Input.Keyboard.CursorKeys;
   isTouchingGround = false;
@@ -34,7 +34,13 @@ export class PlayerController {
           bodyB.gameObject.name === "coolLink"
             ? [bodyB, bodyA]
             : [bodyA, bodyB];
-        if (other.position.y > player.position.y) {
+        if (other.gameObject?.name === "lava") {
+          console.log("game over");
+          this.scene.scene.restart();
+        } else if (other.gameObject?.name === "coin") {
+          const sprite: Phaser.Physics.Matter.Sprite = other.gameObject;
+          sprite.destroy();
+        } else if (other.position.y > player.position.y) {
           this.isTouchingGround = true;
         } else {
           other.friction = 0;
@@ -47,7 +53,7 @@ export class PlayerController {
   createAnims() {
     this.sprite.anims.create({
       key: "run",
-      frameRate: 20,
+      frameRate: 18,
       frames: this.sprite.anims.generateFrameNames("coolLink", {
         start: 1,
         end: 12,

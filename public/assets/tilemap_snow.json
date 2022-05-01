@@ -128,6 +128,83 @@
                  "width":70,
                  "x":71.4206,
                  "y":6823.69
+                }, 
+                {
+                 "height":70,
+                 "id":2,
+                 "name":"lava",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":71.6498955762293,
+                 "x":700,
+                 "y":6929.94584203531
+                }, 
+                {
+                 "height":70,
+                 "id":5,
+                 "name":"coin",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":70,
+                 "x":1046.13632048605,
+                 "y":6578.69755078793
+                }, 
+                {
+                 "height":70,
+                 "id":6,
+                 "name":"coin",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":70,
+                 "x":343.649136130625,
+                 "y":6367.9513954813
+                }, 
+                {
+                 "height":70,
+                 "id":7,
+                 "name":"coin",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":70,
+                 "x":768.93867476742,
+                 "y":6014.80918929182
+                }, 
+                {
+                 "height":70,
+                 "id":8,
+                 "name":"platformA",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":210,
+                 "x":558.192519460794,
+                 "y":5530.66261629011
+                }, 
+                {
+                 "height":70,
+                 "id":11,
+                 "name":"platformA",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":210,
+                 "x":668.312132143535,
+                 "y":4830.07404594646
+                }, 
+                {
+                 "height":70,
+                 "id":10,
+                 "name":"platformA",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":210,
+                 "x":560.091133472565,
+                 "y":6647.04765521169
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -136,7 +213,7 @@
          "y":0
         }],
  "nextlayerid":3,
- "nextobjectid":2,
+ "nextobjectid":12,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.4",
