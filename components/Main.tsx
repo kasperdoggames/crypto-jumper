@@ -163,7 +163,7 @@ export default class Main extends Phaser.Scene {
     // run through state for player controller
     this.player.stateMachine.step();
     // increase the rise of over time?
-    this.lava.y -= 2;
-    this.lavapart.y -= 2;
+    this.lava.y -= 3.5;
+    this.lavapart.y -= 3.5;
   }
 }
