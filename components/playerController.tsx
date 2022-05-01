@@ -23,6 +23,7 @@ export class PlayerController {
         idle: this.idleState,
         run: this.runState,
         jump: this.jumpState,
+        melt: this.meltState,
       },
       [this]
     );
@@ -36,7 +37,7 @@ export class PlayerController {
             : [bodyA, bodyB];
         if (other.gameObject?.name === "lava") {
           console.log("game over");
-          this.scene.scene.restart();
+          this.stateMachine.transition("melt");
         } else if (other.gameObject?.name === "coin") {
           const sprite: Phaser.Physics.Matter.Sprite = other.gameObject;
           sprite.destroy();
@@ -51,6 +52,17 @@ export class PlayerController {
 
   // Create animations
   createAnims() {
+    this.sprite.anims.create({
+      key: "melt",
+      frameRate: 18,
+      frames: this.sprite.anims.generateFrameNames("coolLink", {
+        start: 1,
+        end: 12,
+        prefix: "Melt_00",
+        suffix: ".png",
+        zeroPad: 2,
+      }),
+    });
     this.sprite.anims.create({
       key: "run",
       frameRate: 18,
@@ -110,6 +122,16 @@ export class PlayerController {
         return;
       }
     },
+  };
+
+  meltState = {
+    enter: () => {
+      this.sprite.setVelocity(0);
+      this.sprite.anims.play("melt").on("animationcomplete", () => {
+        this.scene.scene.restart();
+      });
+    },
+    execute: () => {},
   };
 
   runState = {
