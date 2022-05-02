@@ -11,6 +11,7 @@ export default class Main extends Phaser.Scene {
   music!: Phaser.Sound.BaseSound;
   lava!: Phaser.Physics.Matter.Sprite;
   lavapart!: Phaser.GameObjects.Rectangle;
+  bg_1!: Phaser.GameObjects.TileSprite;
 
   init() {
     // init the keyboard inputs
@@ -25,6 +26,9 @@ export default class Main extends Phaser.Scene {
     this.load.tilemapTiledJSON("tilemap", "assets/tilemap_snow.json");
     this.load.atlas("coin", "assets/coin.png", "assets/coin.json");
     this.load.image("platformA", "assets/platformA.png");
+
+    // testing parallax
+    this.load.image("bg_1", "assets/background.png");
   }
 
   create() {
@@ -36,6 +40,12 @@ export default class Main extends Phaser.Scene {
     const ground = map.createLayer("ground", tileset);
     // set collisions based on custom value on the tilesheet data
     ground.setCollisionByProperty({ collides: true });
+
+    // testing parallax
+    this.bg_1 = this.add.tileSprite(0, 0, ground.width, ground.height, "bg_1");
+    this.bg_1.setOrigin(0, 0);
+    this.bg_1.setScrollFactor(0);
+    this.bg_1.setDepth(-1);
 
     // convert the layer to matter physics for ground
     this.matter.world.convertTilemapLayer(ground);
@@ -106,5 +116,6 @@ export default class Main extends Phaser.Scene {
     // increase the rise of over time?
     this.lava.y -= 2.7;
     this.lavapart.y -= 2.7;
+    this.bg_1.tilePositionY = this.cameras.main.scrollY * 0.3;
   }
 }
