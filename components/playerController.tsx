@@ -40,6 +40,10 @@ export class PlayerController {
           this.stateMachine.transition("melt");
         } else if (other.gameObject?.name === "coin") {
           const sprite: Phaser.Physics.Matter.Sprite = other.gameObject;
+          const current = scene.data.get("coins", 0);
+          scene.data.set("coins", current + 1);
+          const coins = scene.data.get("coins");
+          scene.coinCount.setText([`Coins: ${coins ? coins : "0"}`]);
           sprite.destroy();
         } else if (other.position.y > player.position.y) {
           this.isTouchingGround = true;

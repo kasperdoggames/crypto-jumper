@@ -12,6 +12,7 @@ export default class Main extends Phaser.Scene {
   lava!: Phaser.Physics.Matter.Sprite;
   lavapart!: Phaser.GameObjects.Rectangle;
   bg_1!: Phaser.GameObjects.TileSprite;
+  coinCount!: Phaser.GameObjects.Text;
 
   init() {
     // init the keyboard inputs
@@ -46,6 +47,17 @@ export default class Main extends Phaser.Scene {
     this.bg_1.setOrigin(0, 0);
     this.bg_1.setScrollFactor(0);
     this.bg_1.setDepth(-1);
+
+    // Setup coins
+    this.data.set("coins", 0);
+    this.coinCount = this.add.text(20, 20, "", {
+      fontSize: "32px",
+      color: "#fff",
+    });
+
+    const coins = this.data.get("coins");
+    this.coinCount.setText([`Coins: ${coins ? coins : "0"}`]);
+    this.coinCount.setScrollFactor(0);
 
     // convert the layer to matter physics for ground
     this.matter.world.convertTilemapLayer(ground);
