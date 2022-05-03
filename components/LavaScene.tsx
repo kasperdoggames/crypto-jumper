@@ -4,15 +4,16 @@ import { createLava } from "./Lava";
 import { createPlatform, moveHorizontal, moveVertical } from "./Platform";
 import { PlayerController } from "./playerController";
 
-export default class Main extends Phaser.Scene {
+export default class LavaScene extends Phaser.Scene {
   cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   player!: PlayerController;
   star!: Phaser.Physics.Matter.Sprite;
   music!: Phaser.Sound.BaseSound;
-  lava!: Phaser.Physics.Matter.Sprite;
-  lavapart!: Phaser.GameObjects.Rectangle;
   bg_1!: Phaser.GameObjects.TileSprite;
   coinCount!: Phaser.GameObjects.Text;
+  lavaTileSprite!: Phaser.GameObjects.TileSprite;
+  lavaSprite!: Phaser.Physics.Matter.Sprite;
+  lavapart!: Phaser.GameObjects.Rectangle;
 
   init() {
     // init the keyboard inputs
@@ -22,28 +23,42 @@ export default class Main extends Phaser.Scene {
   preload() {
     // Load all assets for level
     this.load.atlas("coolLink", "assets/coolLink.png", "assets/coolLink.json");
-    this.load.image("tiles", "assets/tilemap_snow.png");
-    this.load.atlas("lava", "assets/lava.png", "assets/lava.json");
-    this.load.tilemapTiledJSON("tilemap", "assets/tilemap_snow.json");
+
+    // tilemaps
+    this.load.image("lava_tiles", "assets/lava_tileset.png");
+    this.load.tilemapTiledJSON("tilemap", "assets/lava_scene.json");
+
+    // coins and platforms
     this.load.atlas("coin", "assets/coin.png", "assets/coin.json");
     this.load.image("platformA", "assets/platformA.png");
 
+    // lava
+    this.load.spritesheet("lavaTileSprites", "assets/lava_tileset.png", {
+      frameWidth: 70,
+      frameHeight: 70,
+    });
     // testing parallax
-    this.load.image("bg_1", "assets/background.png");
+    this.load.image("bg_1", "assets/volcano_bg.png");
   }
 
   create() {
     // create the tile map instance
     const map = this.make.tilemap({ key: "tilemap" });
     // add the tileset to the map
-    const tileset = map.addTilesetImage("tilemap_snow", "tiles");
+    const tileset = map.addTilesetImage("lava_tileset", "lava_tiles");
     // create the ground layer from the loaded tileset
     const ground = map.createLayer("ground", tileset);
     // set collisions based on custom value on the tilesheet data
     ground.setCollisionByProperty({ collides: true });
 
     // testing parallax
-    this.bg_1 = this.add.tileSprite(0, 0, ground.width, ground.height, "bg_1");
+    this.bg_1 = this.add.tileSprite(
+      0,
+      0,
+      Number(this.game.config.width),
+      Number(this.game.config.height),
+      "bg_1"
+    );
     this.bg_1.setOrigin(0, 0);
     this.bg_1.setScrollFactor(0);
     this.bg_1.setDepth(-1);
@@ -96,8 +111,13 @@ export default class Main extends Phaser.Scene {
           player.setPosition(x - 1, y);
           break;
         case "lava":
-          const { lava, lavapart } = createLava(this, x, y);
-          this.lava = lava;
+          const { lavaTileSprite, lavaSprite, lavapart } = createLava(
+            this,
+            x,
+            y
+          );
+          this.lavaTileSprite = lavaTileSprite;
+          this.lavaSprite = lavaSprite;
           this.lavapart = lavapart;
           break;
         case "coin":
@@ -125,9 +145,13 @@ export default class Main extends Phaser.Scene {
   update() {
     // run through state for player controller
     this.player.stateMachine.step();
-    // increase the rise of over time?
-    this.lava.y -= 2.7;
-    this.lavapart.y -= 2.7;
-    this.bg_1.tilePositionY = this.cameras.main.scrollY * 0.3;
+    if (this.lavaSprite && this.lavapart) {
+      this.lavaTileSprite.setFrame(
+        this.lavaSprite.anims.currentFrame.index + 19
+      );
+      this.lavaSprite.y -= 2.7;
+      this.lavapart.y -= 2.7;
+      this.lavaTileSprite.y -= 2.7;
+    }
   }
 }

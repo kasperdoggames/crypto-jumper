@@ -7,7 +7,7 @@ export const createCoin = (scene: Phaser.Scene, x: number, y: number) => {
   coin.setDisplaySize(70, 70);
   coin.anims.create({
     key: "spin",
-    frameRate: 20,
+    frameRate: 10,
     frames: coin.anims.generateFrameNames("coin", {
       start: 1,
       end: 12,

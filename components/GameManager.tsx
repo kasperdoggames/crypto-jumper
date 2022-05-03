@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import "phaser";
-import Main from "./Main";
+import LavaScene from "./LavaScene";
 
 const GameManager = () => {
   useEffect(() => {
@@ -40,8 +40,8 @@ const GameManager = () => {
       false
     );
 
-    game.scene.add("main", Main);
-    game.scene.start("main");
+    game.scene.add("lavaScene", LavaScene);
+    game.scene.start("lavaScene");
   };
 
   return null;
