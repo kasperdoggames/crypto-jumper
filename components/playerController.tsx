@@ -12,9 +12,17 @@ export class PlayerController {
   jumpCount = 0;
   scene: Phaser.Scene;
 
-  constructor(scene: any, sprite: Phaser.Physics.Matter.Sprite) {
+  constructor(scene: any) {
     this.scene = scene;
-    this.sprite = sprite;
+
+    // create a player instance from the spritesheet
+    this.sprite = scene.matter.add
+      .sprite(0, 0, "coolLink", "run_01.png")
+      .setFixedRotation();
+
+    // add a name for the player
+    this.sprite.setName("coolLink");
+
     this.createAnims();
     this.controls = scene.cursors;
     this.stateMachine = new StateMachine(
@@ -26,31 +34,6 @@ export class PlayerController {
         melt: this.meltState,
       },
       [this]
-    );
-
-    this.sprite.setOnCollide(
-      (data: Phaser.Types.Physics.Matter.MatterCollisionData) => {
-        const { bodyA, bodyB } = data;
-        const [player, other] =
-          bodyB.gameObject.name === "coolLink"
-            ? [bodyB, bodyA]
-            : [bodyA, bodyB];
-        if (other.gameObject?.name === "lava") {
-          console.log("game over");
-          this.stateMachine.transition("melt");
-        } else if (other.gameObject?.name === "coin") {
-          const sprite: Phaser.Physics.Matter.Sprite = other.gameObject;
-          const current = scene.data.get("coins", 0);
-          scene.data.set("coins", current + 1);
-          const coins = scene.data.get("coins");
-          scene.coinCount.setText([`Coins: ${coins ? coins : "0"}`]);
-          sprite.destroy();
-        } else if (other.position.y > player.position.y) {
-          this.isTouchingGround = true;
-        } else {
-          other.friction = 0;
-        }
-      }
     );
   }
 
@@ -131,6 +114,7 @@ export class PlayerController {
   meltState = {
     enter: () => {
       this.sprite.setVelocity(0);
+      console.log("melting?");
       this.sprite.anims.play("melt").on("animationcomplete", () => {
         this.scene.scene.restart();
       });

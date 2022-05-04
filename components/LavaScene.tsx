@@ -1,6 +1,6 @@
 import "phaser";
 import { createCoin } from "./Coin";
-import { createLava } from "./Lava";
+import { Lava } from "./Lava";
 import { createPlatform, moveHorizontal, moveVertical } from "./Platform";
 import { PlayerController } from "./playerController";
 
@@ -11,9 +11,7 @@ export default class LavaScene extends Phaser.Scene {
   music!: Phaser.Sound.BaseSound;
   bg_1!: Phaser.GameObjects.TileSprite;
   coinCount!: Phaser.GameObjects.Text;
-  lavaTileSprite!: Phaser.GameObjects.TileSprite;
-  lavaSprite!: Phaser.Physics.Matter.Sprite;
-  lavapart!: Phaser.GameObjects.Rectangle;
+  lava!: Lava;
 
   init() {
     // init the keyboard inputs
@@ -39,6 +37,9 @@ export default class LavaScene extends Phaser.Scene {
     });
     // testing parallax
     this.load.image("bg_1", "assets/volcano_bg.png");
+
+    // load audio
+    this.load.audio("lavaSplash", "assets/lavaSplash.ogg");
   }
 
   create() {
@@ -91,16 +92,8 @@ export default class LavaScene extends Phaser.Scene {
     // get objects layer from the tilemap
     const objectsLayer = map.getObjectLayer("objects");
 
-    // create a player instance from the spritesheet
-    const player = this.matter.add
-      .sprite(0, 0, "coolLink", "run_01.png")
-      .setFixedRotation();
-
-    // add a name for the player
-    player.setName("coolLink");
-
     // create player controller/state
-    this.player = new PlayerController(this, player);
+    this.player = new PlayerController(this);
 
     // loop over all objects in the object layer to assign objects
     objectsLayer.objects.forEach((element) => {
@@ -108,17 +101,10 @@ export default class LavaScene extends Phaser.Scene {
 
       switch (name) {
         case "start":
-          player.setPosition(x - 1, y);
+          this.player.sprite.setPosition(x - 1, y);
           break;
         case "lava":
-          const { lavaTileSprite, lavaSprite, lavapart } = createLava(
-            this,
-            x,
-            y
-          );
-          this.lavaTileSprite = lavaTileSprite;
-          this.lavaSprite = lavaSprite;
-          this.lavapart = lavapart;
+          this.lava = new Lava(this, x, y);
           break;
         case "coin":
           createCoin(this, x, y);
@@ -136,6 +122,40 @@ export default class LavaScene extends Phaser.Scene {
       }
     });
 
+    // setup collisions
+    this.matter.world.on(
+      "collisionstart",
+      (_event: any, bodyA: any, bodyB: any) => {
+        // don't care about any other collisions
+        if (
+          bodyA.gameObject?.name !== "coolLink" &&
+          bodyB.gameObject?.name !== "coolLink"
+        ) {
+          return;
+        }
+        const [coolLink, other] =
+          bodyB.gameObject?.name === "coolLink"
+            ? [bodyB, bodyA]
+            : [bodyA, bodyB];
+        if (other.gameObject?.name === "lavaSprite") {
+          console.log("game over?");
+          this.lava.meltSound();
+          this.player.stateMachine.transition("melt");
+        } else if (other.gameObject?.name === "coin") {
+          const sprite: Phaser.Physics.Matter.Sprite = other.gameObject;
+          const current = this.data.get("coins");
+          this.data.set("coins", current + 1);
+          const coins = this.data.get("coins");
+          this.coinCount.setText([`Coins: ${coins ? coins : "0"}`]);
+          sprite.destroy();
+        } else if (other.position.y > coolLink.position.y) {
+          this.player.isTouchingGround = true;
+        } else {
+          other.friction = 0;
+        }
+      }
+    );
+
     // set bounds for the camera
     this.cameras.main.setBounds(0, 0, ground.width, ground.height);
     // camera to follow the player (this will change to auto scroll up)
@@ -145,13 +165,6 @@ export default class LavaScene extends Phaser.Scene {
   update() {
     // run through state for player controller
     this.player.stateMachine.step();
-    if (this.lavaSprite && this.lavapart) {
-      this.lavaTileSprite.setFrame(
-        this.lavaSprite.anims.currentFrame.index + 19
-      );
-      this.lavaSprite.y -= 2.7;
-      this.lavapart.y -= 2.7;
-      this.lavaTileSprite.y -= 2.7;
-    }
+    this.lava.update();
   }
 }
