@@ -42,7 +42,7 @@
 },
 {
 	"filename": "coinSpin0006.png",
-	"frame": {"x":500,"y":0,"w":100,"h":100},
+	"frame": {"x":0,"y":100,"w":100,"h":100},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":100},
@@ -50,7 +50,7 @@
 },
 {
 	"filename": "coinSpin0007.png",
-	"frame": {"x":600,"y":0,"w":100,"h":100},
+	"frame": {"x":100,"y":100,"w":100,"h":100},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":100},
@@ -58,7 +58,7 @@
 },
 {
 	"filename": "coinSpin0008.png",
-	"frame": {"x":700,"y":0,"w":100,"h":100},
+	"frame": {"x":200,"y":100,"w":100,"h":100},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":100},
@@ -66,7 +66,7 @@
 },
 {
 	"filename": "coinSpin0009.png",
-	"frame": {"x":800,"y":0,"w":100,"h":100},
+	"frame": {"x":300,"y":100,"w":100,"h":100},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":100},
@@ -74,7 +74,7 @@
 },
 {
 	"filename": "coinSpin0010.png",
-	"frame": {"x":900,"y":0,"w":100,"h":100},
+	"frame": {"x":400,"y":100,"w":100,"h":100},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":100},
@@ -82,7 +82,7 @@
 },
 {
 	"filename": "coinSpin0011.png",
-	"frame": {"x":1000,"y":0,"w":100,"h":100},
+	"frame": {"x":0,"y":200,"w":100,"h":100},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":100},
@@ -90,7 +90,103 @@
 },
 {
 	"filename": "coinSpin0012.png",
-	"frame": {"x":1100,"y":0,"w":100,"h":100},
+	"frame": {"x":100,"y":200,"w":100,"h":100},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":100},
+	"sourceSize": {"w":100,"h":100}
+},
+{
+	"filename": "coinSpinLink0001.png",
+	"frame": {"x":200,"y":200,"w":100,"h":100},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":100},
+	"sourceSize": {"w":100,"h":100}
+},
+{
+	"filename": "coinSpinLink0002.png",
+	"frame": {"x":300,"y":200,"w":100,"h":100},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":100},
+	"sourceSize": {"w":100,"h":100}
+},
+{
+	"filename": "coinSpinLink0003.png",
+	"frame": {"x":400,"y":200,"w":100,"h":100},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":100},
+	"sourceSize": {"w":100,"h":100}
+},
+{
+	"filename": "coinSpinLink0004.png",
+	"frame": {"x":0,"y":300,"w":100,"h":100},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":100},
+	"sourceSize": {"w":100,"h":100}
+},
+{
+	"filename": "coinSpinLink0005.png",
+	"frame": {"x":100,"y":300,"w":100,"h":100},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":100},
+	"sourceSize": {"w":100,"h":100}
+},
+{
+	"filename": "coinSpinLink0006.png",
+	"frame": {"x":200,"y":300,"w":100,"h":100},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":100},
+	"sourceSize": {"w":100,"h":100}
+},
+{
+	"filename": "coinSpinLink0007.png",
+	"frame": {"x":300,"y":300,"w":100,"h":100},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":100},
+	"sourceSize": {"w":100,"h":100}
+},
+{
+	"filename": "coinSpinLink0008.png",
+	"frame": {"x":400,"y":300,"w":100,"h":100},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":100},
+	"sourceSize": {"w":100,"h":100}
+},
+{
+	"filename": "coinSpinLink0009.png",
+	"frame": {"x":0,"y":400,"w":100,"h":100},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":100},
+	"sourceSize": {"w":100,"h":100}
+},
+{
+	"filename": "coinSpinLink0010.png",
+	"frame": {"x":100,"y":400,"w":100,"h":100},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":100},
+	"sourceSize": {"w":100,"h":100}
+},
+{
+	"filename": "coinSpinLink0011.png",
+	"frame": {"x":200,"y":400,"w":100,"h":100},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":100},
+	"sourceSize": {"w":100,"h":100}
+},
+{
+	"filename": "coinSpinLink0012.png",
+	"frame": {"x":300,"y":400,"w":100,"h":100},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":100},
@@ -101,8 +197,8 @@
 	"version": "1.0",
 	"image": "coin.png",
 	"format": "RGBA8888",
-	"size": {"w":1200,"h":100},
+	"size": {"w":500,"h":500},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:f80923ebcbd149a29ba206b29cc6f9f8:a6effb2fe9d750bc304e5d425e38bdb4:37dcde439de7f7292f96409a4c62c08e$"
+	"smartupdate": "$TexturePacker:SmartUpdate:1a854e642c4445f79211c606736eb915:c3a997d7688667dec18922ccddb9c0ee:37dcde439de7f7292f96409a4c62c08e$"
 }
 }

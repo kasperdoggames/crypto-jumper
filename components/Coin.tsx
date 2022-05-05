@@ -27,6 +27,19 @@ export class Coins {
       }),
       repeat: -1,
     });
+
+    scene.anims.create({
+      key: "ChainLinkSpin",
+      frameRate: 10,
+      frames: scene.anims.generateFrameNames("coin", {
+        start: 1,
+        end: 12,
+        prefix: "coinSpinLink00",
+        suffix: ".png",
+        zeroPad: 2,
+      }),
+      repeat: -1,
+    });
   }
 
   addCoin(scene: Phaser.Scene, x: number, y: number, coinType: CoinType) {
@@ -37,7 +50,17 @@ export class Coins {
     coin.setName("coin");
     coin.setData("coinType", coinType);
     coin.setDisplaySize(70, 70);
-    coin.anims.play("spin", true);
+    switch (coinType) {
+      case "chainlink":
+        coin.anims.play("ChainLinkSpin", true);
+        break;
+      case "dai":
+        coin.anims.play("spin", true);
+        break;
+      default:
+        break;
+    }
+
     this.coins.push(coin);
   }
 
