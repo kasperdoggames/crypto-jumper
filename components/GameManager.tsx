@@ -2,10 +2,12 @@ import { useEffect } from "react";
 import "phaser";
 import LavaScene from "./LavaScene";
 
+let game: Phaser.Game;
+
 const GameManager = () => {
   useEffect(() => {
     loadGame();
-  }, []);
+  }, [game]);
 
   const loadGame = async () => {
     if (typeof window !== "object") {
@@ -25,13 +27,17 @@ const GameManager = () => {
           // Enable debug graphics, so we can see the bounds of each physics
           // object in our scene. Note: this can slow things down, so be sure
           // to turn it off when you aren't debugging
-          // debug: true,
+          debug: true,
         },
       },
       parent: "game",
     };
 
-    const game = new Phaser.Game(config);
+    if (game) {
+      return;
+    }
+
+    game = new Phaser.Game(config);
     window.addEventListener(
       "resize",
       () => {

@@ -7,7 +7,6 @@ import { PlayerController } from "./playerController";
 export default class LavaScene extends Phaser.Scene {
   cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   player!: PlayerController;
-  star!: Phaser.Physics.Matter.Sprite;
   music!: Phaser.Sound.BaseSound;
   bg_1!: Phaser.GameObjects.TileSprite;
   coinCount!: Phaser.GameObjects.Text;
@@ -35,7 +34,8 @@ export default class LavaScene extends Phaser.Scene {
       frameWidth: 70,
       frameHeight: 70,
     });
-    // testing parallax
+
+    // parallax
     this.load.image("bg_1", "assets/volcano_bg.png");
 
     // load audio
@@ -138,6 +138,7 @@ export default class LavaScene extends Phaser.Scene {
             ? [bodyB, bodyA]
             : [bodyA, bodyB];
         if (other.gameObject?.name === "lavaSprite") {
+          // This seems to trigger when not collided? But doesn't restart level
           console.log("game over?");
           this.lava.meltSound();
           this.player.stateMachine.transition("melt");

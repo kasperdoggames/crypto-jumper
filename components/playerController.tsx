@@ -114,7 +114,6 @@ export class PlayerController {
   meltState = {
     enter: () => {
       this.sprite.setVelocity(0);
-      console.log("melting?");
       this.sprite.anims.play("melt").on("animationcomplete", () => {
         this.scene.scene.restart();
       });
