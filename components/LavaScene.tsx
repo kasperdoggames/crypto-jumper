@@ -1,5 +1,5 @@
 import "phaser";
-import { createCoin } from "./Coin";
+import { Coins } from "./Coin";
 import { Lava } from "./Lava";
 import { createPlatform, moveHorizontal, moveVertical } from "./Platform";
 import { PlayerController } from "./playerController";
@@ -11,6 +11,7 @@ export default class LavaScene extends Phaser.Scene {
   bg_1!: Phaser.GameObjects.TileSprite;
   coinCount!: Phaser.GameObjects.Text;
   lava!: Lava;
+  coins!: Coins;
 
   init() {
     // init the keyboard inputs
@@ -39,10 +40,14 @@ export default class LavaScene extends Phaser.Scene {
     this.load.image("bg_1", "assets/volcano_bg.png");
 
     // load audio
+    this.load.audio("lavaMusic", "assets/lavaMusic.mp3");
     this.load.audio("lavaSplash", "assets/lavaSplash.ogg");
+    this.load.audio("coinPickup", "assets/coinPickup.ogg");
   }
 
   create() {
+    // create coins class
+    this.coins = new Coins(this);
     // create the tile map instance
     const map = this.make.tilemap({ key: "tilemap" });
     // add the tileset to the map
@@ -107,7 +112,7 @@ export default class LavaScene extends Phaser.Scene {
           this.lava = new Lava(this, x, y);
           break;
         case "coin":
-          createCoin(this, x, y);
+          this.coins.addCoin(this, x, y);
           break;
         case "platformA":
           const platformA = createPlatform(this, x, y, "platformA");
@@ -138,8 +143,6 @@ export default class LavaScene extends Phaser.Scene {
             ? [bodyB, bodyA]
             : [bodyA, bodyB];
         if (other.gameObject?.name === "lavaSprite") {
-          // This seems to trigger when not collided? But doesn't restart level
-          console.log("game over?");
           this.lava.meltSound();
           this.player.stateMachine.transition("melt");
         } else if (other.gameObject?.name === "coin") {
@@ -148,6 +151,7 @@ export default class LavaScene extends Phaser.Scene {
           this.data.set("coins", current + 1);
           const coins = this.data.get("coins");
           this.coinCount.setText([`Coins: ${coins ? coins : "0"}`]);
+          this.coins.playSound();
           sprite.destroy();
         } else if (other.position.y > coolLink.position.y) {
           this.player.isTouchingGround = true;
@@ -161,6 +165,47 @@ export default class LavaScene extends Phaser.Scene {
     this.cameras.main.setBounds(0, 0, ground.width, ground.height);
     // camera to follow the player (this will change to auto scroll up)
     this.cameras.main.startFollow(this.player.sprite, true);
+
+    if (!this.sound.get("lavaMusic")) {
+      // add background music
+      this.music = this.sound.add("lavaMusic", {
+        delay: 0,
+        loop: true,
+        seek: 0,
+        mute: false,
+        volume: 0.2,
+        rate: 1,
+        detune: 0,
+      });
+    }
+    // Background music
+    if (!this.sound.locked) {
+      // already unlocked so play
+      if (!this.music.isPlaying) {
+        this.music.play();
+      }
+    } else {
+      // wait for 'unlocked' to fire and then play
+      this.sound.once(Phaser.Sound.Events.UNLOCKED, () => {
+        if (!this.music.isPlaying) {
+          this.music.play();
+        }
+      });
+    }
+
+    // pause on blur and resume when back
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) {
+        return;
+      }
+      this.music.pause();
+    });
+
+    this.game.events.on(Phaser.Core.Events.RESUME, () => {
+      if (this.music.isPaused) {
+        this.music.resume();
+      }
+    });
   }
 
   update() {
