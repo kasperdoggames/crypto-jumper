@@ -1,5 +1,5 @@
 import "phaser";
-import { Coins } from "./Coin";
+import { Coins, CoinType } from "./Coin";
 import { Lava } from "./Lava";
 import { createPlatform, moveHorizontal, moveVertical } from "./Platform";
 import { PlayerController } from "./playerController";
@@ -9,7 +9,6 @@ export default class LavaScene extends Phaser.Scene {
   player!: PlayerController;
   music!: Phaser.Sound.BaseSound;
   bg_1!: Phaser.GameObjects.TileSprite;
-  coinCount!: Phaser.GameObjects.Text;
   lava!: Lava;
   coins!: Coins;
 
@@ -46,6 +45,8 @@ export default class LavaScene extends Phaser.Scene {
   }
 
   create() {
+    // Load UI
+    this.scene.launch("ui");
     // create coins class
     this.coins = new Coins(this);
     // create the tile map instance
@@ -68,17 +69,6 @@ export default class LavaScene extends Phaser.Scene {
     this.bg_1.setOrigin(0, 0);
     this.bg_1.setScrollFactor(0);
     this.bg_1.setDepth(-1);
-
-    // Setup coins
-    this.data.set("coins", 0);
-    this.coinCount = this.add.text(20, 20, "", {
-      fontSize: "32px",
-      color: "#fff",
-    });
-
-    const coins = this.data.get("coins");
-    this.coinCount.setText([`Coins: ${coins ? coins : "0"}`]);
-    this.coinCount.setScrollFactor(0);
 
     // convert the layer to matter physics for ground
     this.matter.world.convertTilemapLayer(ground);
@@ -112,7 +102,8 @@ export default class LavaScene extends Phaser.Scene {
           this.lava = new Lava(this, x, y);
           break;
         case "coin":
-          this.coins.addCoin(this, x, y);
+          const coinType: CoinType = element.properties[0]?.value;
+          this.coins.addCoin(this, x, y, coinType);
           break;
         case "platformA":
           const platformA = createPlatform(this, x, y, "platformA");
@@ -146,13 +137,7 @@ export default class LavaScene extends Phaser.Scene {
           this.lava.meltSound();
           this.player.stateMachine.transition("melt");
         } else if (other.gameObject?.name === "coin") {
-          const sprite: Phaser.Physics.Matter.Sprite = other.gameObject;
-          const current = this.data.get("coins");
-          this.data.set("coins", current + 1);
-          const coins = this.data.get("coins");
-          this.coinCount.setText([`Coins: ${coins ? coins : "0"}`]);
-          this.coins.playSound();
-          sprite.destroy();
+          this.coins.pickupCoin(this, other.gameObject);
         } else if (other.position.y > coolLink.position.y) {
           this.player.isTouchingGround = true;
         } else {

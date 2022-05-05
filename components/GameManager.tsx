@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import "phaser";
+import UI from "./UIScene";
 import LavaScene from "./LavaScene";
 
 let game: Phaser.Game;
@@ -47,6 +48,7 @@ const GameManager = () => {
     );
 
     game.scene.add("lavaScene", LavaScene);
+    game.scene.add("ui", UI);
     game.scene.start("lavaScene");
   };
 
