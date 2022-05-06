@@ -352,6 +352,23 @@
                  "width":25.9633,
                  "x":1245.91514715302,
                  "y":5080.43472010676
+                }, 
+                {
+                 "height":25.9633,
+                 "id":17,
+                 "name":"coin",
+                 "properties":[
+                        {
+                         "name":"coinType",
+                         "type":"string",
+                         "value":"matic"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":25.9633,
+                 "x":749.918705871886,
+                 "y":4862.46318985765
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -360,7 +377,7 @@
          "y":0
         }],
  "nextlayerid":4,
- "nextobjectid":17,
+ "nextobjectid":18,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.4",

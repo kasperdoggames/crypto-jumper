@@ -40,6 +40,18 @@ export class Coins {
       }),
       repeat: -1,
     });
+    scene.anims.create({
+      key: "MaticSpin",
+      frameRate: 10,
+      frames: scene.anims.generateFrameNames("coin", {
+        start: 1,
+        end: 12,
+        prefix: "coinSpinMatic00",
+        suffix: ".png",
+        zeroPad: 2,
+      }),
+      repeat: -1,
+    });
   }
 
   addCoin(scene: Phaser.Scene, x: number, y: number, coinType: CoinType) {
@@ -51,6 +63,9 @@ export class Coins {
     coin.setData("coinType", coinType);
     coin.setDisplaySize(70, 70);
     switch (coinType) {
+      case "matic":
+        coin.anims.play("MaticSpin", true);
+        break;
       case "chainlink":
         coin.anims.play("ChainLinkSpin", true);
         break;

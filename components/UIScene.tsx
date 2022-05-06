@@ -5,6 +5,7 @@ import { CoinType } from "./Coin";
 export default class UI extends Scene {
   daiCount!: Phaser.GameObjects.Text;
   chainCount!: Phaser.GameObjects.Text;
+  maticCount!: Phaser.GameObjects.Text;
 
   constructor() {
     super({
@@ -23,6 +24,11 @@ export default class UI extends Scene {
       color: "#fff",
     });
 
+    this.maticCount = this.add.text(20, 80, "matic: 0", {
+      fontSize: "32px",
+      color: "#fff",
+    });
+
     events.on(
       "coinCollected",
       (data: { coinType: CoinType; coinCount: number }) => {
@@ -35,6 +41,12 @@ export default class UI extends Scene {
           case "chainlink":
             this.chainCount.setText([
               `link: ${data.coinCount ? data.coinCount : "0"}`,
+            ]);
+            break;
+
+          case "matic":
+            this.maticCount.setText([
+              `matic: ${data.coinCount ? data.coinCount : "0"}`,
             ]);
             break;
 
