@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import "phaser";
 import UI from "./UIScene";
 import LavaScene from "./LavaScene";
+import MainMenu from "./MainMenuScene";
 
 let game: Phaser.Game;
 
@@ -51,9 +52,10 @@ const GameManager = () => {
       false
     );
 
+    game.scene.add("main", MainMenu);
     game.scene.add("lavaScene", LavaScene);
     game.scene.add("ui", UI);
-    game.scene.start("lavaScene");
+    game.scene.start("main");
   };
 
   return null;

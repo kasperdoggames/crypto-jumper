@@ -3,9 +3,7 @@ import { sharedInstance as events } from "./EventCenter";
 import { CoinType } from "./Coin";
 
 export default class UI extends Scene {
-  daiCount!: Phaser.GameObjects.Text;
-  chainCount!: Phaser.GameObjects.Text;
-  maticCount!: Phaser.GameObjects.Text;
+  coinCount!: Phaser.GameObjects.Text;
 
   constructor() {
     super({
@@ -14,45 +12,31 @@ export default class UI extends Scene {
   }
 
   create() {
-    this.daiCount = this.add.text(20, 20, "dai : 0", {
-      fontSize: "32px",
-      color: "#fff",
-    });
+    const coinCollectedData = {
+      dai: 0,
+      chainlink: 0,
+      matic: 0,
+      eth: 0,
+    };
 
-    this.chainCount = this.add.text(20, 50, "link: 0", {
-      fontSize: "32px",
-      color: "#fff",
-    });
+    const displayCoinCount = () => {
+      let data: string = "";
+      for (const [key, value] of Object.entries(coinCollectedData)) {
+        data += `${key}: ${value}\n`;
+      }
+      return data;
+    };
 
-    this.maticCount = this.add.text(20, 80, "matic: 0", {
-      fontSize: "32px",
+    this.coinCount = this.add.text(20, 20, displayCoinCount(), {
+      fontSize: "20px",
       color: "#fff",
     });
 
     events.on(
       "coinCollected",
       (data: { coinType: CoinType; coinCount: number }) => {
-        switch (data.coinType) {
-          case "dai":
-            this.daiCount.setText([
-              `dai:  ${data.coinCount ? data.coinCount : "0"}`,
-            ]);
-            break;
-          case "chainlink":
-            this.chainCount.setText([
-              `link: ${data.coinCount ? data.coinCount : "0"}`,
-            ]);
-            break;
-
-          case "matic":
-            this.maticCount.setText([
-              `matic: ${data.coinCount ? data.coinCount : "0"}`,
-            ]);
-            break;
-
-          default:
-            break;
-        }
+        coinCollectedData[data.coinType] = data.coinCount ? data.coinCount : 0;
+        this.coinCount.setText(displayCoinCount());
       }
     );
   }

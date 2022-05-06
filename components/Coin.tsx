@@ -17,7 +17,7 @@ export class Coins {
     // create anims
     scene.anims.create({
       key: "spin",
-      frameRate: 10,
+      frameRate: 5,
       frames: scene.anims.generateFrameNames("coin", {
         start: 1,
         end: 12,
@@ -27,10 +27,9 @@ export class Coins {
       }),
       repeat: -1,
     });
-
     scene.anims.create({
       key: "ChainLinkSpin",
-      frameRate: 10,
+      frameRate: 5,
       frames: scene.anims.generateFrameNames("coin", {
         start: 1,
         end: 12,
@@ -42,11 +41,23 @@ export class Coins {
     });
     scene.anims.create({
       key: "MaticSpin",
-      frameRate: 10,
+      frameRate: 5,
       frames: scene.anims.generateFrameNames("coin", {
         start: 1,
         end: 12,
         prefix: "coinSpinMatic00",
+        suffix: ".png",
+        zeroPad: 2,
+      }),
+      repeat: -1,
+    });
+    scene.anims.create({
+      key: "EthSpin",
+      frameRate: 5,
+      frames: scene.anims.generateFrameNames("coin", {
+        start: 1,
+        end: 12,
+        prefix: "coinSpinEth00",
         suffix: ".png",
         zeroPad: 2,
       }),
@@ -63,6 +74,9 @@ export class Coins {
     coin.setData("coinType", coinType);
     coin.setDisplaySize(70, 70);
     switch (coinType) {
+      case "eth":
+        coin.anims.play("EthSpin", true);
+        break;
       case "matic":
         coin.anims.play("MaticSpin", true);
         break;

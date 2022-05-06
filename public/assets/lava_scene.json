@@ -369,6 +369,91 @@
                  "width":25.9633,
                  "x":749.918705871886,
                  "y":4862.46318985765
+                }, 
+                {
+                 "height":25.9633,
+                 "id":18,
+                 "name":"coin",
+                 "properties":[
+                        {
+                         "name":"coinType",
+                         "type":"string",
+                         "value":"eth"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":25.9633,
+                 "x":478.566392704626,
+                 "y":4864.68738914591
+                }, 
+                {
+                 "height":25.9633,
+                 "id":19,
+                 "name":"coin",
+                 "properties":[
+                        {
+                         "name":"coinType",
+                         "type":"string",
+                         "value":"eth"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":25.9633,
+                 "x":1141.37778060498,
+                 "y":4439.86532508897
+                }, 
+                {
+                 "height":25.9633,
+                 "id":20,
+                 "name":"coin",
+                 "properties":[
+                        {
+                         "name":"coinType",
+                         "type":"string",
+                         "value":"matic"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":25.9633,
+                 "x":845.559275266904,
+                 "y":4090.66603683274
+                }, 
+                {
+                 "height":25.9633,
+                 "id":21,
+                 "name":"coin",
+                 "properties":[
+                        {
+                         "name":"coinType",
+                         "type":"string",
+                         "value":"matic"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":25.9633,
+                 "x":116.021908718861,
+                 "y":3821.53792295374
+                }, 
+                {
+                 "height":25.9633,
+                 "id":22,
+                 "name":"coin",
+                 "properties":[
+                        {
+                         "name":"coinType",
+                         "type":"string",
+                         "value":"eth"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":25.9633,
+                 "x":792.178492348754,
+                 "y":3530.16781619217
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -377,7 +462,7 @@
          "y":0
         }],
  "nextlayerid":4,
- "nextobjectid":18,
+ "nextobjectid":23,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.4",
