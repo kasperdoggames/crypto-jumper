@@ -25,6 +25,24 @@ export default class MainMenu extends Phaser.Scene {
 
     playButton.setInteractive();
 
+    playButton.on("pointerover", () => {
+      playButton
+        .setFont("280%")
+        .setPosition(
+          this.game.renderer.width / 2 - 60,
+          this.game.renderer.height * 0.7
+        );
+    });
+
+    playButton.on("pointerout", () => {
+      playButton
+        .setFont("250%")
+        .setPosition(
+          this.game.renderer.width / 2 - 50,
+          this.game.renderer.height * 0.7
+        );
+    });
+
     playButton.on("pointerup", () => {
       this.scene.start("lavaScene");
     });

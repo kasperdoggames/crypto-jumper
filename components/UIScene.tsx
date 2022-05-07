@@ -12,6 +12,28 @@ export default class UI extends Scene {
   }
 
   create() {
+    const exitButton = this.add
+      .text(this.game.renderer.width - 150, 20, "< Quit >")
+      .setFont("250%");
+    exitButton.setInteractive();
+    exitButton.on("pointerover", () => {
+      exitButton
+        .setFont("280%")
+        .setPosition(this.game.renderer.width - 160, 20);
+    });
+
+    exitButton.on("pointerout", () => {
+      exitButton
+        .setFont("250%")
+        .setPosition(this.game.renderer.width - 150, 20);
+    });
+
+    exitButton.on("pointerup", () => {
+      this.sound.removeByKey("lavaMusic");
+      this.scene.stop("lavaScene");
+      this.scene.start("main");
+    });
+
     const coinCollectedData = {
       dai: 0,
       chainlink: 0,
