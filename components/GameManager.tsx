@@ -9,7 +9,7 @@ let game: Phaser.Game;
 const GameManager = () => {
   useEffect(() => {
     loadGame();
-  }, [game]);
+  }, []);
 
   const loadGame = async () => {
     if (typeof window !== "object") {
