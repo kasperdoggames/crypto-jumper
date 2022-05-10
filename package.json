@@ -4,8 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "ts-node server",
-    "build": "next build",
-    "start": "next start -p $PORT",
+    "build": "next build && tsc --project tsconfig.server.json",
+    "postinstall": "npm run build",
+    "start": "NODE_ENV=production node .next/production-server/server.js",
     "lint": "next lint"
   },
   "dependencies": {
