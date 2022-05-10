@@ -1,4 +1,6 @@
 import "phaser";
+import { Socket } from "socket.io-client";
+import { DefaultEventsMap } from "socket.io/dist/typed-events";
 import { StateMachine } from "./StateMachine";
 
 export class PlayerController {
@@ -11,9 +13,11 @@ export class PlayerController {
   spriteY?: number;
   jumpCount = 0;
   scene: Phaser.Scene;
+  socket!: Socket<DefaultEventsMap, DefaultEventsMap>;
 
   constructor(scene: any) {
     this.scene = scene;
+    this.socket = scene.socket;
 
     // create a player instance from the spritesheet
     this.sprite = scene.matter.add
@@ -39,7 +43,7 @@ export class PlayerController {
 
   // Create animations
   createAnims() {
-    this.sprite.anims.create({
+    this.scene.anims.create({
       key: "melt",
       frameRate: 18,
       frames: this.sprite.anims.generateFrameNames("coolLink", {
@@ -50,9 +54,9 @@ export class PlayerController {
         zeroPad: 2,
       }),
     });
-    this.sprite.anims.create({
+    this.scene.anims.create({
       key: "run",
-      frameRate: 18,
+      frameRate: 20,
       frames: this.sprite.anims.generateFrameNames("coolLink", {
         start: 1,
         end: 12,
@@ -62,7 +66,7 @@ export class PlayerController {
       }),
       repeat: -1,
     });
-    this.sprite.anims.create({
+    this.scene.anims.create({
       key: "idle",
       frameRate: 20,
       frames: this.sprite.anims.generateFrameNames("coolLink", {
@@ -74,17 +78,17 @@ export class PlayerController {
       }),
       repeat: -1,
     });
-    this.sprite.anims.create({
+    this.scene.anims.create({
       key: "jump",
       frames: [{ key: "coolLink", frame: "run_05.png" }],
       repeat: 0,
     });
-    this.sprite.anims.create({
+    this.scene.anims.create({
       key: "doublejump",
       frames: [{ key: "coolLink", frame: "run_06.png" }],
       repeat: 0,
     });
-    this.sprite.anims.create({
+    this.scene.anims.create({
       key: "fall",
       frames: [{ key: "coolLink", frame: "run_10.png" }],
       repeat: 0,
@@ -96,6 +100,10 @@ export class PlayerController {
     enter: () => {
       this.sprite.setVelocity(0);
       this.sprite.anims.play("idle");
+      this.socket.emit("playerUpdate", {
+        state: "idle",
+        location: this.sprite.body.position,
+      });
     },
     execute: () => {
       const { space, left, right } = this.controls;
@@ -114,7 +122,12 @@ export class PlayerController {
   meltState = {
     enter: () => {
       this.sprite.setVelocity(0);
+      this.socket.emit("playerUpdate", {
+        state: "melt",
+        location: this.sprite.body.position,
+      });
       this.sprite.anims.play("melt").on("animationcomplete", () => {
+        this.socket.emit("dead");
         this.scene.scene.restart();
       });
     },
@@ -124,6 +137,11 @@ export class PlayerController {
   runState = {
     enter: () => {
       this.sprite.anims.play("run");
+      this.socket.emit("playerUpdate", {
+        state: "run",
+        location: this.sprite.body.position,
+        flipX: this.sprite.flipX,
+      });
     },
     execute: () => {
       const { space, left, right } = this.controls;
@@ -139,6 +157,11 @@ export class PlayerController {
         this.sprite.setVelocityX(this.speed);
         this.sprite.flipX = false;
       }
+      this.socket.emit("playerUpdate", {
+        state: "run",
+        location: this.sprite.body.position,
+        flipX: this.sprite.flipX,
+      });
       if (!(left.isDown || right.isDown)) {
         this.stateMachine.transition("idle");
         return;
@@ -176,6 +199,11 @@ export class PlayerController {
         this.sprite.setVelocityX(this.speed);
         this.sprite.flipX = false;
       }
+      this.socket.emit("playerUpdate", {
+        state: "jump",
+        location: this.sprite.body.position,
+        flipX: this.sprite.flipX,
+      });
       if (this.isTouchingGround) {
         this.jumpCount = 0;
         this.stateMachine.transition("idle");

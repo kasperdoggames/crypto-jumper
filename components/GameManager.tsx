@@ -33,7 +33,7 @@ const GameManager = () => {
         },
       },
       fps: {
-        target: 60,
+        target: 45,
         forceSetTimeOut: true,
       },
       parent: "game",

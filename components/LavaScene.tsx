@@ -3,18 +3,55 @@ import { Coins, CoinType } from "./Coin";
 import { Lava } from "./Lava";
 import { createPlatform, moveHorizontal, moveVertical } from "./Platform";
 import { PlayerController } from "./playerController";
+import { Socket } from "socket.io-client";
+import { DefaultEventsMap } from "socket.io/dist/typed-events";
+import socket from "socket.io-client";
 
 export default class LavaScene extends Phaser.Scene {
   cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   player!: PlayerController;
+  otherPlayers: Map<string, Phaser.GameObjects.Sprite> = new Map();
   music!: Phaser.Sound.BaseSound;
   bg_1!: Phaser.GameObjects.TileSprite;
   lava!: Lava;
   coins!: Coins;
+  socket!: Socket<DefaultEventsMap, DefaultEventsMap>;
+  start!: { x: number; y: number };
 
   init() {
     // init the keyboard inputs
     this.cursors = this.input.keyboard.createCursorKeys();
+    this.socket = socket();
+    this.socket.on("newPlayer", (data: any) => {
+      const existing = this.otherPlayers.get(data.id);
+      if (existing) {
+        return;
+      } else {
+        const player = this.add.sprite(0, 0, "coolLink", "idle_01.png");
+        player.setAlpha(0.5);
+
+        // add other player to list
+        this.otherPlayers.set(data.id, player);
+        player.setPosition(this.start.x - 1, this.start.y);
+      }
+    });
+
+    this.socket.on("playerUpdate", (data: any) => {
+      const player = this.otherPlayers.get(data.id);
+      if (player) {
+        player.setPosition(data.location.x, data.location.y);
+        player?.anims?.play(data.state, true);
+        player.setFlipX(data.flipX);
+      }
+    });
+
+    this.socket.on("dead", (data: any) => {
+      const player = this.otherPlayers.get(data.id);
+      if (player) {
+        this.otherPlayers.delete(data.id);
+        player.destroy();
+      }
+    });
   }
 
   preload() {
@@ -97,6 +134,7 @@ export default class LavaScene extends Phaser.Scene {
       switch (name) {
         case "start":
           this.player.sprite.setPosition(x - 1, y);
+          this.start = { x, y };
           break;
         case "lava":
           this.lava = new Lava(this, x, y);
@@ -196,6 +234,7 @@ export default class LavaScene extends Phaser.Scene {
   update() {
     // run through state for player controller
     this.player.stateMachine.step();
+    // update lava
     this.lava.update();
   }
 }
