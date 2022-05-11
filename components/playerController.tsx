@@ -2,6 +2,7 @@ import "phaser";
 import { Socket } from "socket.io-client";
 import { DefaultEventsMap } from "socket.io/dist/typed-events";
 import { StateMachine } from "./StateMachine";
+import { sharedInstance as events } from "./EventCenter";
 
 export class PlayerController {
   sprite!: Phaser.Physics.Matter.Sprite;
@@ -129,7 +130,8 @@ export class PlayerController {
       });
       this.sprite.anims.play("melt").on("animationcomplete", () => {
         this.socket.close();
-        this.scene.scene.restart();
+        events.emit("playerMessage", "You Died");
+        // this.scene.scene.restart();
       });
     },
     execute: () => {},

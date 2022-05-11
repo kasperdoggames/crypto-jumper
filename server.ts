@@ -17,6 +17,7 @@ nextApp.prepare().then(() => {
   io.on("connection", async (socket) => {
     console.log("a user connected", socket.id);
 
+    // this really needs to be on redis against a game "room"
     const existingPlayers = await io.sockets.allSockets();
 
     socket.emit("existingPlayers", {

@@ -5,6 +5,7 @@ import { CoinType } from "./Coin";
 export default class UI extends Scene {
   coinCount!: Phaser.GameObjects.Text;
   countdownText!: Phaser.GameObjects.Text;
+  playerMessage!: Phaser.GameObjects.Text;
 
   constructor() {
     super({
@@ -65,6 +66,13 @@ export default class UI extends Scene {
       }
     );
 
+    this.playerMessage = this.add
+      .text(180, 150, "", {
+        fontSize: "30px",
+        color: "#fff",
+      })
+      .setAlpha(0);
+
     events.on(
       "coinCollected",
       (data: { coinType: CoinType; coinCount: number }) => {
@@ -78,6 +86,10 @@ export default class UI extends Scene {
       } else {
         this.countdownText.setText(`Waiting for other players... ${counter}`);
       }
+    });
+
+    events.on("playerMessage", (message: string) => {
+      this.playerMessage.setText(message).setAlpha(1);
     });
   }
 }
