@@ -13,7 +13,8 @@ export class Coins {
     });
 
     // add pickup sound
-    this.pickupSound = scene.sound.add("coinPickup");
+    const pickup = scene.sound.get("coinPickup");
+    this.pickupSound = pickup ? pickup : scene.sound.add("coinPickup");
     // create anims
     scene.anims.create({
       key: "spin",

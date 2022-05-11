@@ -38,6 +38,10 @@ nextApp.prepare().then(() => {
       // ethers call to contracts
     });
 
+    socket.on("countdown", (counter: number) => {
+      socket.broadcast.emit("countdown", counter);
+    });
+
     socket.on("disconnect", () => {
       console.log("client disconnected", socket.id);
       socket.broadcast.emit("dead", { id: socket.id });

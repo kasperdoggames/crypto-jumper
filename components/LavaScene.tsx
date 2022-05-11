@@ -6,6 +6,7 @@ import { PlayerController } from "./playerController";
 import { Socket } from "socket.io-client";
 import { DefaultEventsMap } from "socket.io/dist/typed-events";
 import socket from "socket.io-client";
+import { sharedInstance as events } from "./EventCenter";
 
 export default class LavaScene extends Phaser.Scene {
   cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -18,6 +19,8 @@ export default class LavaScene extends Phaser.Scene {
   socket!: Socket<DefaultEventsMap, DefaultEventsMap>;
   start!: { x: number; y: number };
   loading: boolean = true;
+  counter: number = 10;
+  timer!: Phaser.Time.TimerEvent;
 
   loadFromSocket() {
     // load up socketIO
@@ -31,16 +34,24 @@ export default class LavaScene extends Phaser.Scene {
       });
       this.otherPlayers.clear();
       // map through existing players and add to game list
-      data.players.map((otherPlayer: string) => {
+      data.players.map((otherPlayer: string, index: number) => {
         if (this.socket.id === otherPlayer) {
+          // if the first to join the game - set the wait time
+          if (index === 0 && !this.timer) {
+            this.timer = this.time.addEvent({
+              delay: 1000,
+              callback: this.updateCounter,
+              callbackScope: this,
+              loop: true,
+            });
+          }
           return;
         }
         const player = this.add.sprite(0, 0, "coolLink", "idle_01.png");
         player.setAlpha(0.5);
-        //      player.setPosition(this.start.x - 1, this.start.y);
-        // add other player to list
         this.otherPlayers.set(otherPlayer, player);
       });
+
       this.loading = false;
     });
 
@@ -55,6 +66,11 @@ export default class LavaScene extends Phaser.Scene {
       otherPlayer?.setFlipX(data.flipX);
     });
 
+    this.socket.on("countdown", (counter: number) => {
+      this.counter = counter;
+      events.emit("countdown", this.counter);
+    });
+
     this.socket.on("dead", (data: any) => {
       const player = this.otherPlayers.get(data.id);
       if (player) {
@@ -62,6 +78,15 @@ export default class LavaScene extends Phaser.Scene {
         player.destroy();
       }
     });
+  }
+
+  updateCounter() {
+    this.counter--;
+    events.emit("countdown", this.counter);
+    this.socket.emit("countdown", this.counter);
+    if (this.counter < 0) {
+      this.timer.destroy();
+    }
   }
 
   init() {
@@ -80,6 +105,7 @@ export default class LavaScene extends Phaser.Scene {
     // coins and platforms
     this.load.atlas("coin", "assets/coin.png", "assets/coin.json");
     this.load.image("platformA", "assets/platformA.png");
+    this.load.image("bell", "assets/bell.png");
 
     // lava
     this.load.spritesheet("lavaTileSprites", "assets/lava_tileset.png", {
@@ -94,10 +120,13 @@ export default class LavaScene extends Phaser.Scene {
     this.load.audio("lavaMusic", "assets/lavaMusic.mp3");
     this.load.audio("lavaSplash", "assets/lavaSplash.ogg");
     this.load.audio("coinPickup", "assets/coinPickup.ogg");
+    this.load.audio("bell", "assets/bell.mp3");
   }
 
   create() {
+    // load up socketIO
     this.loadFromSocket();
+
     // Load UI
     this.scene.launch("ui");
     // create coins class
@@ -152,6 +181,12 @@ export default class LavaScene extends Phaser.Scene {
           this.player.sprite.setPosition(x - 1, y);
           this.start = { x, y };
           break;
+        case "finish":
+          this.matter.add
+            .sprite(x, y, "bell")
+            .setStatic(true)
+            .setName("finish");
+          break;
         case "lava":
           this.lava = new Lava(this, x, y);
           break;
@@ -190,13 +225,23 @@ export default class LavaScene extends Phaser.Scene {
         if (other.gameObject?.name === "lavaSprite") {
           this.lava.meltSound();
           this.player.stateMachine.transition("melt");
-        } else if (other.gameObject?.name === "coin") {
-          this.coins.pickupCoin(this, other.gameObject);
-        } else if (other.position.y > coolLink.position.y) {
-          this.player.isTouchingGround = true;
-        } else {
-          other.friction = 0;
+          return;
         }
+        if (other.gameObject?.name === "coin") {
+          this.coins.pickupCoin(this, other.gameObject);
+          return;
+        }
+        if (other.gameObject?.name === "finish") {
+          const finish = this.sound.get("bell");
+          finish.play();
+          this.player.sprite.anims.play("idle");
+          this.counter = 10;
+        }
+        if (other.position.y > coolLink.position.y) {
+          this.player.isTouchingGround = true;
+          return;
+        }
+        other.friction = 0;
       }
     );
 
@@ -216,6 +261,10 @@ export default class LavaScene extends Phaser.Scene {
         rate: 1,
         detune: 0,
       });
+    }
+
+    if (!this.sound.get("bell")) {
+      this.sound.add("bell");
     }
     // Background music
     if (!this.sound.locked) {
@@ -248,8 +297,7 @@ export default class LavaScene extends Phaser.Scene {
   }
 
   update() {
-    if (this.loading) {
-      //todo add a spinner?
+    if (this.loading || this.counter >= 0) {
       return;
     }
     // run through state for player controller
