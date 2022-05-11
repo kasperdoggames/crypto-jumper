@@ -14,10 +14,18 @@ nextApp.prepare().then(() => {
 
   app.set("port", process.env.PORT || 3000);
 
-  io.on("connection", (socket) => {
+  io.on("connection", async (socket) => {
     console.log("a user connected", socket.id);
-    socket.broadcast.emit("newPlayer", {
-      id: socket.id,
+
+    const existingPlayers = await io.sockets.allSockets();
+    existingPlayers.delete(socket.id);
+
+    socket.emit("existingPlayers", {
+      players: Array.from(existingPlayers),
+    });
+
+    socket.broadcast.emit("existingPlayers", {
+      players: Array.from(existingPlayers),
     });
 
     socket.on("dead", () => {

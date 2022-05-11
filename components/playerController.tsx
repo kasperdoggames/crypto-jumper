@@ -100,10 +100,6 @@ export class PlayerController {
     enter: () => {
       this.sprite.setVelocity(0);
       this.sprite.anims.play("idle");
-      this.socket.emit("playerUpdate", {
-        state: "idle",
-        location: this.sprite.body.position,
-      });
     },
     execute: () => {
       const { space, left, right } = this.controls;
@@ -116,6 +112,10 @@ export class PlayerController {
         this.stateMachine.transition("run");
         return;
       }
+      this.socket.emit("playerUpdate", {
+        state: "idle",
+        location: this.sprite.body.position,
+      });
     },
   };
 
@@ -128,6 +128,7 @@ export class PlayerController {
       });
       this.sprite.anims.play("melt").on("animationcomplete", () => {
         this.socket.emit("dead");
+        this.socket.close();
         this.scene.scene.restart();
       });
     },

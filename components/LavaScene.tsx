@@ -17,23 +17,25 @@ export default class LavaScene extends Phaser.Scene {
   coins!: Coins;
   socket!: Socket<DefaultEventsMap, DefaultEventsMap>;
   start!: { x: number; y: number };
+  loading: boolean = false;
 
-  init() {
-    // init the keyboard inputs
-    this.cursors = this.input.keyboard.createCursorKeys();
+  loadFromSocket() {
     this.socket = socket();
-    this.socket.on("newPlayer", (data: any) => {
-      const existing = this.otherPlayers.get(data.id);
-      if (existing) {
-        return;
-      } else {
-        const player = this.add.sprite(0, 0, "coolLink", "idle_01.png");
-        player.setAlpha(0.5);
-
-        // add other player to list
-        this.otherPlayers.set(data.id, player);
-        player.setPosition(this.start.x - 1, this.start.y);
-      }
+    this.loading = true;
+    this.socket.on("existingPlayers", (data: any) => {
+      data.players.map((otherPlayer: string) => {
+        const existing = this.otherPlayers.get(otherPlayer);
+        if (existing) {
+          return;
+        } else {
+          const player = this.add.sprite(0, 0, "coolLink", "idle_01.png");
+          player.setAlpha(0.5);
+          // add other player to list
+          this.otherPlayers.set(otherPlayer, player);
+          player.setPosition(this.start.x - 1, this.start.y);
+        }
+      });
+      this.loading = false;
     });
 
     this.socket.on("playerUpdate", (data: any) => {
@@ -41,7 +43,7 @@ export default class LavaScene extends Phaser.Scene {
       if (player) {
         player.setPosition(data.location.x, data.location.y);
         player?.anims?.play(data.state, true);
-        player.setFlipX(data.flipX);
+        player?.setFlipX(data.flipX);
       }
     });
 
@@ -52,6 +54,11 @@ export default class LavaScene extends Phaser.Scene {
         player.destroy();
       }
     });
+  }
+
+  init() {
+    // init the keyboard inputs
+    this.cursors = this.input.keyboard.createCursorKeys();
   }
 
   preload() {
@@ -82,6 +89,7 @@ export default class LavaScene extends Phaser.Scene {
   }
 
   create() {
+    this.loadFromSocket();
     // Load UI
     this.scene.launch("ui");
     // create coins class
@@ -232,6 +240,10 @@ export default class LavaScene extends Phaser.Scene {
   }
 
   update() {
+    if (this.loading) {
+      //todo add a spinner?
+      return;
+    }
     // run through state for player controller
     this.player.stateMachine.step();
     // update lava
