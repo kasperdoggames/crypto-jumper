@@ -6,8 +6,8 @@ import { StateMachine } from "./StateMachine";
 export class PlayerController {
   sprite!: Phaser.Physics.Matter.Sprite;
   stateMachine!: StateMachine;
-  speed = 8;
-  jumpSpeed = -25;
+  speed = 4;
+  jumpSpeed = -20;
   controls: Phaser.Types.Input.Keyboard.CursorKeys;
   isTouchingGround = false;
   spriteY?: number;
