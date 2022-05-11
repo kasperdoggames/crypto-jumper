@@ -18,7 +18,6 @@ nextApp.prepare().then(() => {
     console.log("a user connected", socket.id);
 
     const existingPlayers = await io.sockets.allSockets();
-    existingPlayers.delete(socket.id);
 
     socket.emit("existingPlayers", {
       players: Array.from(existingPlayers),
@@ -26,10 +25,6 @@ nextApp.prepare().then(() => {
 
     socket.broadcast.emit("existingPlayers", {
       players: Array.from(existingPlayers),
-    });
-
-    socket.on("dead", () => {
-      socket.broadcast.emit("dead", { id: socket.id });
     });
 
     socket.on("playerUpdate", (data: any) => {
@@ -45,6 +40,7 @@ nextApp.prepare().then(() => {
 
     socket.on("disconnect", () => {
       console.log("client disconnected", socket.id);
+      socket.broadcast.emit("dead", { id: socket.id });
     });
   });
 

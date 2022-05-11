@@ -127,7 +127,6 @@ export class PlayerController {
         location: this.sprite.body.position,
       });
       this.sprite.anims.play("melt").on("animationcomplete", () => {
-        this.socket.emit("dead");
         this.socket.close();
         this.scene.scene.restart();
       });

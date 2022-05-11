@@ -17,34 +17,42 @@ export default class LavaScene extends Phaser.Scene {
   coins!: Coins;
   socket!: Socket<DefaultEventsMap, DefaultEventsMap>;
   start!: { x: number; y: number };
-  loading: boolean = false;
+  loading: boolean = true;
 
   loadFromSocket() {
+    // load up socketIO
     this.socket = socket();
+    // set loading is true while obtaining list of other players
     this.loading = true;
+    // get a list of existing players
     this.socket.on("existingPlayers", (data: any) => {
+      this.otherPlayers.forEach((player) => {
+        player.destroy();
+      });
+      this.otherPlayers.clear();
+      // map through existing players and add to game list
       data.players.map((otherPlayer: string) => {
-        const existing = this.otherPlayers.get(otherPlayer);
-        if (existing) {
+        if (this.socket.id === otherPlayer) {
           return;
-        } else {
-          const player = this.add.sprite(0, 0, "coolLink", "idle_01.png");
-          player.setAlpha(0.5);
-          // add other player to list
-          this.otherPlayers.set(otherPlayer, player);
-          player.setPosition(this.start.x - 1, this.start.y);
         }
+        const player = this.add.sprite(0, 0, "coolLink", "idle_01.png");
+        player.setAlpha(0.5);
+        //      player.setPosition(this.start.x - 1, this.start.y);
+        // add other player to list
+        this.otherPlayers.set(otherPlayer, player);
       });
       this.loading = false;
     });
 
     this.socket.on("playerUpdate", (data: any) => {
-      const player = this.otherPlayers.get(data.id);
-      if (player) {
-        player.setPosition(data.location.x, data.location.y);
-        player?.anims?.play(data.state, true);
-        player?.setFlipX(data.flipX);
+      const otherPlayer = this.otherPlayers.get(data.id);
+      if (!otherPlayer) {
+        console.log("no other player", data.id);
+        return;
       }
+      otherPlayer.setPosition(data.location.x, data.location.y);
+      otherPlayer?.anims?.play(data.state, true);
+      otherPlayer?.setFlipX(data.flipX);
     });
 
     this.socket.on("dead", (data: any) => {
@@ -247,6 +255,6 @@ export default class LavaScene extends Phaser.Scene {
     // run through state for player controller
     this.player.stateMachine.step();
     // update lava
-    this.lava.update();
+    // this.lava.update();
   }
 }
