@@ -8,6 +8,19 @@ import { DefaultEventsMap } from "socket.io/dist/typed-events";
 import socket from "socket.io-client";
 import { sharedInstance as events } from "./EventCenter";
 
+interface GameLevelData {
+  gameId: string;
+  players: string[];
+  gameState: "waiting" | "runnning" | "end";
+}
+
+interface PlayerData {
+  playerId: string;
+  state: string;
+  location: { x: number; y: number };
+  flipX: boolean;
+}
+
 export default class LavaScene extends Phaser.Scene {
   cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   player!: PlayerController;
@@ -21,20 +34,31 @@ export default class LavaScene extends Phaser.Scene {
   loading: boolean = true;
   counter: number = 10;
   timer!: Phaser.Time.TimerEvent;
+  gameId!: string;
+  level!: string;
 
   loadFromSocket() {
     // load up socketIO
     this.socket = socket();
     // set loading is true while obtaining list of other players
     this.loading = true;
-    // get a list of existing players
-    this.socket.on("existingPlayers", (data: any) => {
+
+    this.socket.on("connect", () => {
+      // get a game object to listen to for the duration of game
+      console.log("requesting game");
+      this.socket.emit("gameRequest", "lava");
+    });
+
+    // wait for response from server on game object
+    this.socket.on("gameData", (gameData: GameLevelData) => {
+      this.gameId = gameData.gameId;
+      // refresh all players
       this.otherPlayers.forEach((player) => {
         player.destroy();
       });
       this.otherPlayers.clear();
       // map through existing players and add to game list
-      data.players.map((otherPlayer: string, index: number) => {
+      gameData.players.map((otherPlayer: string, index: number) => {
         if (this.socket.id === otherPlayer) {
           // if the first to join the game - set the wait time
           if (index === 0 && !this.timer) {
@@ -52,23 +76,57 @@ export default class LavaScene extends Phaser.Scene {
         this.otherPlayers.set(otherPlayer, player);
       });
 
+      // setup channels to listen on..
+
+      // listen on game data updates
+      this.socket.on(`lava_${gameData.gameId}`, (data: GameLevelData) => {
+        // refresh all players
+        this.otherPlayers.forEach((player) => {
+          player.destroy();
+        });
+        this.otherPlayers.clear();
+        // map through existing players and add to game list
+        data.players.map((otherPlayer: string, index: number) => {
+          if (this.socket.id === otherPlayer) {
+            // if the first to join the game - set the wait time
+            if (index === 0 && !this.timer) {
+              this.timer = this.time.addEvent({
+                delay: 1000,
+                callback: this.updateCounter,
+                callbackScope: this,
+                loop: true,
+              });
+            }
+            return;
+          }
+          const player = this.add.sprite(0, 0, "coolLink", "idle_01.png");
+          player.setAlpha(0.5);
+          this.otherPlayers.set(otherPlayer, player);
+        });
+      });
+
+      //listen on player updates
+      this.socket.on(
+        `lava_${gameData.gameId}_player`,
+        (playerData: PlayerData) => {
+          const otherPlayer = this.otherPlayers.get(playerData.playerId);
+          if (!otherPlayer) {
+            console.log("no other player", playerData.playerId);
+            return;
+          }
+          otherPlayer.setPosition(playerData.location.x, playerData.location.y);
+          otherPlayer?.anims?.play(playerData.state, true);
+          otherPlayer?.setFlipX(playerData.flipX);
+        }
+      );
+
+      //listen on countdown updates
+      this.socket.on(`lava_${gameData.gameId}_countdown`, (counter: number) => {
+        this.counter = counter;
+        events.emit("countdown", this.counter);
+      });
+
       this.loading = false;
-    });
-
-    this.socket.on("playerUpdate", (data: any) => {
-      const otherPlayer = this.otherPlayers.get(data.id);
-      if (!otherPlayer) {
-        console.log("no other player", data.id);
-        return;
-      }
-      otherPlayer.setPosition(data.location.x, data.location.y);
-      otherPlayer?.anims?.play(data.state, true);
-      otherPlayer?.setFlipX(data.flipX);
-    });
-
-    this.socket.on("countdown", (counter: number) => {
-      this.counter = counter;
-      events.emit("countdown", this.counter);
     });
 
     this.socket.on("dead", (data: any) => {
@@ -83,13 +141,26 @@ export default class LavaScene extends Phaser.Scene {
   updateCounter() {
     this.counter--;
     events.emit("countdown", this.counter);
-    this.socket.emit("countdown", this.counter);
+    this.socket.emit("countdown", {
+      level: "lava",
+      gameId: this.gameId,
+      counter: this.counter,
+    });
+
     if (this.counter < 0) {
       this.timer.destroy();
+      this.socket.emit("gameUpdate", {
+        level: this.level,
+        gameId: this.gameId,
+        state: "running",
+      });
     }
   }
 
   init() {
+    this.level = "lava";
+    // load up socketIO
+    this.loadFromSocket();
     // init the keyboard inputs
     this.cursors = this.input.keyboard.createCursorKeys();
   }
@@ -124,9 +195,6 @@ export default class LavaScene extends Phaser.Scene {
   }
 
   create() {
-    // load up socketIO
-    this.loadFromSocket();
-
     // Load UI
     this.scene.launch("ui");
     // create coins class
@@ -236,6 +304,11 @@ export default class LavaScene extends Phaser.Scene {
           finish.play();
           this.player.sprite.anims.play("idle");
           this.counter = 10;
+          this.socket.emit("gameUpdate", {
+            level: this.level,
+            gameId: this.gameId,
+            state: "end",
+          });
         }
         if (other.position.y > coolLink.position.y) {
           this.player.isTouchingGround = true;

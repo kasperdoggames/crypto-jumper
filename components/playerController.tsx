@@ -13,12 +13,14 @@ export class PlayerController {
   isTouchingGround = false;
   spriteY?: number;
   jumpCount = 0;
-  scene: Phaser.Scene;
+  scene: any;
   socket!: Socket<DefaultEventsMap, DefaultEventsMap>;
+  level!: string;
 
   constructor(scene: any) {
     this.scene = scene;
     this.socket = scene.socket;
+    this.level = scene.level;
 
     // create a player instance from the spritesheet
     this.sprite = scene.matter.add
@@ -115,8 +117,12 @@ export class PlayerController {
         return;
       }
       this.socket.emit("playerUpdate", {
-        state: "idle",
-        location: this.sprite.body.position,
+        level: this.level,
+        gameId: this.scene.gameId,
+        playerData: {
+          state: "idle",
+          location: this.sprite.body.position,
+        },
       });
     },
   };
@@ -125,8 +131,12 @@ export class PlayerController {
     enter: () => {
       this.sprite.setVelocity(0);
       this.socket.emit("playerUpdate", {
-        state: "melt",
-        location: this.sprite.body.position,
+        level: this.level,
+        gameId: this.scene.gameId,
+        playerData: {
+          state: "melt",
+          location: this.sprite.body.position,
+        },
       });
       this.sprite.anims.play("melt").on("animationcomplete", () => {
         this.socket.close();
@@ -141,9 +151,13 @@ export class PlayerController {
     enter: () => {
       this.sprite.anims.play("run");
       this.socket.emit("playerUpdate", {
-        state: "run",
-        location: this.sprite.body.position,
-        flipX: this.sprite.flipX,
+        level: this.level,
+        gameId: this.scene.gameId,
+        playerData: {
+          state: "run",
+          location: this.sprite.body.position,
+          flipX: this.sprite.flipX,
+        },
       });
     },
     execute: () => {
@@ -161,9 +175,13 @@ export class PlayerController {
         this.sprite.flipX = false;
       }
       this.socket.emit("playerUpdate", {
-        state: "run",
-        location: this.sprite.body.position,
-        flipX: this.sprite.flipX,
+        level: this.level,
+        gameId: this.scene.gameId,
+        playerData: {
+          state: "run",
+          location: this.sprite.body.position,
+          flipX: this.sprite.flipX,
+        },
       });
       if (!(left.isDown || right.isDown)) {
         this.stateMachine.transition("idle");
@@ -203,9 +221,13 @@ export class PlayerController {
         this.sprite.flipX = false;
       }
       this.socket.emit("playerUpdate", {
-        state: "jump",
-        location: this.sprite.body.position,
-        flipX: this.sprite.flipX,
+        level: this.level,
+        gameId: this.scene.gameId,
+        playerData: {
+          state: "jump",
+          location: this.sprite.body.position,
+          flipX: this.sprite.flipX,
+        },
       });
       if (this.isTouchingGround) {
         this.jumpCount = 0;

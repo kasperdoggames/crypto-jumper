@@ -32,6 +32,10 @@ export default class UI extends Scene {
 
     exitButton.on("pointerup", () => {
       this.sound.removeByKey("lavaMusic");
+      const scene: any = this.scene.get("lavaScene");
+      scene.socket.disconnect();
+      scene.timer = undefined;
+      scene.counter = 10;
       this.scene.stop("lavaScene");
       this.scene.start("main");
     });
@@ -56,15 +60,10 @@ export default class UI extends Scene {
       color: "#fff",
     });
 
-    this.countdownText = this.add.text(
-      180,
-      150,
-      "Waiting for other players... 10",
-      {
-        fontSize: "30px",
-        color: "#fff",
-      }
-    );
+    this.countdownText = this.add.text(180, 150, "Waiting for available game", {
+      fontSize: "30px",
+      color: "#fff",
+    });
 
     this.playerMessage = this.add
       .text(180, 150, "", {
