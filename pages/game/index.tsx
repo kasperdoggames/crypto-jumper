@@ -28,10 +28,13 @@ const Home: NextPage = () => {
   }, [cryptAccount]);
 
   // Dynamic Loader to wait before loaing up the phaser game
-  const DynamicLoader = dynamic(() => import("./GameManager"), {
-    loading: () => <p>Loading...</p>,
-    ssr: false,
-  });
+  const DynamicLoader = dynamic(
+    () => import("../../components/gameComponents/GameManager"),
+    {
+      loading: () => <p>Loading...</p>,
+      ssr: false,
+    }
+  );
 
   const handleMintNFT = async () => {
     const { ethereum } = window;
