@@ -1,13 +1,13 @@
 import type { NextPage } from "next";
 import Head from "next/head";
 import dynamic from "next/dynamic";
-import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useAccount, useNetwork } from "wagmi";
 import { useEffect, useState } from "react";
 import { BaseProvider } from "@ethersproject/providers";
 import { GetAccountResult } from "@wagmi/core";
 import { getGameNFTTokenContract, getP2EGameContract } from "../support/eth";
 import { ethers } from "ethers";
+import Navbar from "../components/Navbar";
 
 const Home: NextPage = () => {
   const [cryptAccount, setCryptAccount] =
@@ -68,34 +68,38 @@ const Home: NextPage = () => {
 
   // todo check claims
   return (
-    <div>
-      <Head>
-        <title>Crypto Jumper</title>
-      </Head>
-      <div className="flex flex-col items-center bg-blue-900 h-screen">
-        <ConnectButton />
-        {cryptAccount && !activeChain?.unsupported ? (
-          <div>
-            {!hasNFT ? (
-              <button
-                className="px-4 py-4 font-bold text-white bg-green-600 rounded-xl hover:bg-green-100 hover:text-green-400"
-                onClick={handleMintNFT}
-              >
-                Mint NFT
-              </button>
+    <div className="bg-gray-900">
+      <div className="container h-full mx-auto max-w-7xl">
+        <div>
+          <Head>
+            <title>Crypto Jumper</title>
+          </Head>
+          <Navbar />
+          <div className="flex flex-col items-center h-screen bg-gray-900">
+            {cryptAccount && !activeChain?.unsupported ? (
+              <div>
+                {!hasNFT ? (
+                  <button
+                    className="px-4 py-4 font-bold text-white bg-green-600 rounded-xl hover:bg-green-100 hover:text-green-400"
+                    onClick={handleMintNFT}
+                  >
+                    Mint NFT
+                  </button>
+                ) : (
+                  <>
+                    <div id="game"></div>
+                    <DynamicLoader />
+                  </>
+                )}
+              </div>
             ) : (
-              <>
-                <div id="game"></div>
-                <DynamicLoader />
-              </>
+              <div>
+                <img src="/assets/logo.png"></img>
+                <p>Please Connect to Play</p>
+              </div>
             )}
           </div>
-        ) : (
-          <div>
-            <img src="/assets/logo.png"></img>
-            <p>Please Connect to Play</p>
-          </div>
-        )}
+        </div>
       </div>
     </div>
   );

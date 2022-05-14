@@ -4,7 +4,14 @@ module.exports = {
     "./components/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        patchyrobots: ["PatchyRobots", "sans-serif"],
+        koalafamily: ["KoalaFamily", "sans-serif"],
+        bradbunr: ["BradBunR", "sans-serif"],
+        splatch: ["Splatch", "sans-serif"],
+      },
+    },
   },
   plugins: [],
 };

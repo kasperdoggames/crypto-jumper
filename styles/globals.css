@@ -1,3 +1,23 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@font-face {
+  font-family: "PatchyRobots";
+  src: url("../public/fonts/PatchyRobots.otf");
+}
+
+@font-face {
+  font-family: "KoalaFamily";
+  src: url("../public/fonts/KoalaFamily.ttf");
+}
+
+@font-face {
+  font-family: "BradBunR";
+  src: url("../public/fonts/BradBunR.ttf");
+}
+
+@font-face {
+  font-family: "Splatch";
+  src: url("../public/fonts/Splatch.ttf");
+}
