@@ -9,7 +9,7 @@ const Cool: NextPage = () => {
         <Head>
           <title>Crypto Jumper</title>
         </Head>
-        <Navbar />
+        <Navbar currentPageHref="cool" />
         <div className="flex flex-col items-center h-screen bg-gray-900">
           <h1 className="py-8 text-2xl text-white font-splatch">
             Powered by $COOL

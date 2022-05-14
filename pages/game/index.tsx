@@ -77,7 +77,7 @@ const Home: NextPage = () => {
           <Head>
             <title>Crypto Jumper</title>
           </Head>
-          <Navbar />
+          <Navbar currentPageHref="game" />
           <div className="flex flex-col items-center h-screen bg-gray-700">
             {cryptAccount && !activeChain?.unsupported ? (
               <div>

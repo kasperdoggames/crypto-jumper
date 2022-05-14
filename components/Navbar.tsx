@@ -1,7 +1,6 @@
 import { Fragment } from "react";
 import { Disclosure, Menu, Transition } from "@headlessui/react";
 import { BellIcon, MenuIcon, XIcon } from "@heroicons/react/outline";
-import { PlusSmIcon } from "@heroicons/react/solid";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 const user = {
@@ -21,7 +20,14 @@ function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
 }
 
-const Navbar = () => {
+const Navbar = ({ currentPageHref }: { currentPageHref: string }) => {
+  navigation.map((nav) => {
+    if (nav.href === currentPageHref) {
+      nav.current = true;
+    } else {
+      nav.current = false;
+    }
+  });
   return (
     <Disclosure as="nav" className="bg-gray-800">
       {({ open }) => (
