@@ -9,7 +9,7 @@ const nextApp = next({ dev });
 const handle = nextApp.getRequestHandler();
 
 interface GameLevelData {
-  players: string[];
+  players: string[]; //todo: {account: string | undefined, socketId: string}[]
   gameState: "waiting" | "running" | "end";
 }
 
@@ -38,14 +38,54 @@ nextApp.prepare().then(() => {
     }
   */
 
+  // contract events
+
   const gameRooms = new Map<string, Map<string, GameLevelData>>();
   const playersWaiting: string[] = [];
   const assignedPlayers = new Map<string, string>();
 
+  let gameState: "begin" | "new" | "started" | "finished";
+
   app.set("port", process.env.PORT || 3000);
+
+  // call contract for state and update gameState var
+  /*
+    gameSate =  p2eGameContract.getGameSessionState();
+  */
+
+  // start listener to contract..
+
+  /*
+     test via simulator....
+
+      p2eGameContract.on("newGame", (gameId: any) => {
+        gameState = "new"
+        io.emit("newGame", {gameId}))
+      })
+
+       p2eGameContract.on("gameStarted", (gameId: any) => {
+        gameState = "started"
+      })
+
+       p2eGameContract.on("gameFinished", (gameId: any) => {
+        gameState = "finished"
+      })
+
+       p2eGameContract.on("gameSettled", (gameId: any) => {
+         
+      })
+
+      p2eGameContract.on("PlayerJoinedGame", (address, clientId) => {
+        console.log("PlayerJoinedGame", address, clientId);
+      });
+    */
 
   io.on("connection", async (socket) => {
     console.log("a user connected", socket.id);
+
+    if (gameState === "new") {
+      io.emit("newGame");
+    }
 
     const createLevel = (roomRequested: string) => {
       const gameId = uuidv4();
@@ -75,7 +115,6 @@ nextApp.prepare().then(() => {
         return;
       }
       // else check player count in last slot
-      console.log("levelData size: ", levelData.size);
       const lastSlot = Array.from(levelData).pop();
       if (!lastSlot) {
         createLevel(roomRequested);

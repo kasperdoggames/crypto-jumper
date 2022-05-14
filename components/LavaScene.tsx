@@ -45,8 +45,17 @@ export default class LavaScene extends Phaser.Scene {
 
     this.socket.on("connect", () => {
       // get a game object to listen to for the duration of game
+
+      // this will not be needed once contract fires newGame
       console.log("requesting game");
       this.socket.emit("gameRequest", "lava");
+    });
+
+    this.socket.on("newGame", () => {
+      // todo: open a dialog to say game available
+      // add yourself to game
+      // button to add me to game.. call addPlayerToGame
+      // socketId to add as param
     });
 
     // wait for response from server on game object
@@ -359,7 +368,7 @@ export default class LavaScene extends Phaser.Scene {
       if (!document.hidden) {
         return;
       }
-      this.music.pause();
+      this.music?.pause();
     });
 
     this.game.events.on(Phaser.Core.Events.RESUME, () => {
@@ -376,6 +385,6 @@ export default class LavaScene extends Phaser.Scene {
     // run through state for player controller
     this.player.stateMachine.step();
     // update lava
-    // this.lava.update();
+    this.lava.update();
   }
 }

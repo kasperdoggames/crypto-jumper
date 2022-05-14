@@ -19,7 +19,7 @@ const GameManager = () => {
     const config = {
       type: Phaser.AUTO,
       width: window.innerWidth - 500,
-      height: window.innerHeight,
+      height: window.innerHeight - 100,
       backgroundColor: "#4488aa",
       physics: {
         default: "matter",

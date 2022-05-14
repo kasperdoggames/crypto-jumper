@@ -31,13 +31,7 @@ export default class UI extends Scene {
     });
 
     exitButton.on("pointerup", () => {
-      this.sound.removeByKey("lavaMusic");
-      const scene: any = this.scene.get("lavaScene");
-      scene.socket.disconnect();
-      scene.timer = undefined;
-      scene.counter = 10;
-      this.scene.stop("lavaScene");
-      this.scene.start("main");
+      window.location.reload();
     });
 
     const coinCollectedData = {

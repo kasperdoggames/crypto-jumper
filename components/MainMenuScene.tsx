@@ -47,6 +47,4 @@ export default class MainMenu extends Phaser.Scene {
       this.scene.start("lavaScene");
     });
   }
-
-  update() {}
 }
