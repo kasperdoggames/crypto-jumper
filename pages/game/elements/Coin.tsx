@@ -1,4 +1,4 @@
-import { sharedInstance as events } from "./EventCenter";
+import { sharedInstance as events } from "../EventCenter";
 
 export type CoinType = "dai" | "chainlink" | "matic" | "eth";
 

@@ -12,11 +12,12 @@ const user = {
 };
 const navigation = [
   { name: "About", href: "about", current: true },
+  { name: "Play ", href: "game", current: false },
   { name: "$COOL ", href: "cool", current: false },
 ];
 const userNavigation = [{ name: "Disconnect", href: "#" }];
 
-function classNames(...classes) {
+function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
 }
 

@@ -1,8 +1,8 @@
 import { useEffect } from "react";
 import "phaser";
-import UI from "./UIScene";
-import LavaScene from "./LavaScene";
-import MainMenu from "./MainMenuScene";
+import UI from "./scenes/UIScene";
+import LavaScene from "./scenes/LavaScene";
+import MainMenu from "./scenes/MainMenuScene";
 
 let game: Phaser.Game;
 

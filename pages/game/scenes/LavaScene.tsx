@@ -1,12 +1,16 @@
 import "phaser";
-import { Coins, CoinType } from "./Coin";
-import { Lava } from "./Lava";
-import { createPlatform, moveHorizontal, moveVertical } from "./Platform";
-import { PlayerController } from "./playerController";
+import { Coins, CoinType } from "../elements/Coin";
+import { Lava } from "../elements/Lava";
+import {
+  createPlatform,
+  moveHorizontal,
+  moveVertical,
+} from "../elements/Platform";
+import { PlayerController } from "../playerController";
 import { Socket } from "socket.io-client";
 import { DefaultEventsMap } from "socket.io/dist/typed-events";
 import socket from "socket.io-client";
-import { sharedInstance as events } from "./EventCenter";
+import { sharedInstance as events } from "../EventCenter";
 
 interface GameLevelData {
   gameId: string;

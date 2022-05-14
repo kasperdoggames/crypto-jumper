@@ -1,6 +1,6 @@
 import { Scene } from "phaser";
-import { sharedInstance as events } from "./EventCenter";
-import { CoinType } from "./Coin";
+import { sharedInstance as events } from "../EventCenter";
+import { CoinType } from "../elements/Coin";
 
 export default class UI extends Scene {
   coinCount!: Phaser.GameObjects.Text;
