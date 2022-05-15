@@ -27,6 +27,10 @@ const Cool: NextPage = () => {
               With 1 $COOL , you can battle to be the first to the top of the
               platforms.
             </p>
+            <p className="text-4xl text-white font-koalafamily">
+              $COOL is the utility token that fuels the Coollink ecosystem. It
+              is NOT an investment and has NO economic value.
+            </p>
           </div>
         </div>
       </div>
