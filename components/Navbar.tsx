@@ -1,26 +1,58 @@
-import { Fragment } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Disclosure, Menu, Transition } from "@headlessui/react";
 import { BellIcon, MenuIcon, XIcon } from "@heroicons/react/outline";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { useAccount } from "wagmi";
+import { getGameNFTTokenContract, toIpfsGatewayURL } from "../support/eth";
 
-const user = {
-  name: "Tom Cook",
-  email: "tom@example.com",
-  imageUrl:
-    "https://bafybeifme5ivs3kv3nd5wcdsbdf52dbg3nysoty62bxanxj6z36kvlcy3y.ipfs.dweb.link/2.png",
-};
 const navigation = [
   { name: "About", href: "about", current: true },
   { name: "Play ", href: "game", current: false },
   { name: "$COOL ", href: "cool", current: false },
 ];
+
 const userNavigation = [{ name: "Disconnect", href: "#" }];
+const DEFAULT_AVATAR_IMAGEURL = "/assets/avatar.png";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
 }
 
 const Navbar = ({ currentPageHref }: { currentPageHref: string }) => {
+  const { data } = useAccount();
+  const [avatarImageUrl, setAvatarImageUrl] = useState(DEFAULT_AVATAR_IMAGEURL);
+
+  useEffect(() => {
+    const getNFTTokens = async () => {
+      if (data) {
+        console.log("address", data.address);
+        const { ethereum } = window;
+        const gameNFTTokenContract = getGameNFTTokenContract(ethereum);
+        if (gameNFTTokenContract) {
+          const nftTokens = await gameNFTTokenContract.walletOfOwner(
+            data.address
+          );
+          if (nftTokens > 0) {
+            const tokenId = nftTokens[0];
+            const tokenJsonString = await gameNFTTokenContract.tokenURI(
+              tokenId
+            );
+            const nftMetadata = toIpfsGatewayURL(tokenJsonString);
+            console.log("nftMetadata", nftMetadata);
+            const response = await fetch(nftMetadata);
+            const metadata = await response.json();
+            console.log("metadata.image", metadata.image);
+            const imageUrl = toIpfsGatewayURL(metadata.image);
+            setAvatarImageUrl(imageUrl);
+          }
+        }
+      } else {
+        setAvatarImageUrl(DEFAULT_AVATAR_IMAGEURL);
+      }
+    };
+    getNFTTokens();
+  }, [data]);
+
   navigation.map((nav) => {
     if (nav.href === currentPageHref) {
       nav.current = true;
@@ -88,7 +120,7 @@ const Navbar = ({ currentPageHref }: { currentPageHref: string }) => {
                         <span className="sr-only">Open user menu</span>
                         <img
                           className="w-8 h-8 rounded-full"
-                          src={user.imageUrl}
+                          src={avatarImageUrl}
                           alt=""
                         />
                       </Menu.Button>
@@ -150,17 +182,9 @@ const Navbar = ({ currentPageHref }: { currentPageHref: string }) => {
                 <div className="flex-shrink-0">
                   <img
                     className="w-10 h-10 rounded-full"
-                    src={user.imageUrl}
+                    src={avatarImageUrl}
                     alt=""
                   />
-                </div>
-                <div className="ml-3">
-                  <div className="text-base font-medium text-white">
-                    {user.name}
-                  </div>
-                  <div className="text-sm font-medium text-gray-400">
-                    {user.email}
-                  </div>
                 </div>
                 <button
                   type="button"

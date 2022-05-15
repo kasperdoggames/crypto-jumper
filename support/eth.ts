@@ -3,6 +3,9 @@ import { ethers } from "ethers";
 import GameTokenJson from "./GameToken.json";
 import GameNFTTokenJson from "./GameNFTToken.json";
 import P2EGameJson from "./P2EGame.json";
+import { toGatewayURL } from "nft.storage";
+
+const IPFS_GATEWAY = "https://ipfs.io/ipfs";
 
 import {
   GAMETOKEN_CONTRACT_ADDRESS,
@@ -50,4 +53,10 @@ export const getP2EGameContract = (ethereum: any) => {
 
     return p2eGameContract;
   }
+};
+
+export const toIpfsGatewayURL = (ipfsPath: string) => {
+  return toGatewayURL(ipfsPath, {
+    gateway: IPFS_GATEWAY,
+  }).toString();
 };
