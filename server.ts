@@ -8,8 +8,13 @@ const dev = process.env.NODE_ENV !== "production";
 const nextApp = next({ dev });
 const handle = nextApp.getRequestHandler();
 
+type Player = {
+  playerId: string;
+  account?: string | undefined;
+};
+
 interface GameLevelData {
-  players: string[]; //todo: {account: string | undefined, socketId: string}[]
+  players: Player[];
   gameState: "waiting" | "running" | "end";
 }
 
@@ -41,7 +46,7 @@ nextApp.prepare().then(() => {
   // contract events
 
   const gameRooms = new Map<string, Map<string, GameLevelData>>();
-  const playersWaiting: string[] = [];
+  const playersWaiting: Player[] = [];
   const assignedPlayers = new Map<string, string>();
 
   let gameState: "begin" | "new" | "started" | "finished";
@@ -90,7 +95,7 @@ nextApp.prepare().then(() => {
     const createLevel = (roomRequested: string) => {
       const gameId = uuidv4();
       const gameData: GameLevelData = {
-        players: [socket.id],
+        players: [{ playerId: socket.id }],
         gameState: "waiting",
       };
       const newSlot = new Map<string, GameLevelData>();
@@ -98,6 +103,7 @@ nextApp.prepare().then(() => {
       gameRooms.set(roomRequested, newSlot);
       assignedPlayers.set(socket.id, `${roomRequested}_${gameId}`);
       // emit game data back to client to allow it to listen on the gameId for updates
+      console.log("emit game data");
       socket.emit("gameData", { gameId, ...gameData });
       // broadcast for any other players on same channel
       socket.broadcast.emit(`${roomRequested}_${gameId}`, {
@@ -121,7 +127,7 @@ nextApp.prepare().then(() => {
         return;
       }
       lastSlot[1].players = lastSlot[1].players.filter((player) => {
-        const playerSocket = io.sockets.sockets.get(player);
+        const playerSocket = io.sockets.sockets.get(player.playerId);
         return playerSocket?.connected;
       });
       if (lastSlot[1].players.length === 0) {
@@ -150,10 +156,12 @@ nextApp.prepare().then(() => {
         // });
 
         // add to queue of waiting users
-        playersWaiting.push(socket.id);
+        playersWaiting.push({ playerId: socket.id });
         return;
       }
-      lastSlot[1].players.push(socket.id);
+      lastSlot[1].players.push({
+        playerId: socket.id,
+      });
       levelData.set(lastSlot[0], lastSlot[1]);
       gameRooms.set(roomRequested, levelData);
       assignedPlayers.set(socket.id, `${roomRequested}_${lastSlot[0]}`);
@@ -207,8 +215,8 @@ nextApp.prepare().then(() => {
         return;
       }
       levelData.delete(oldGameId);
-      const players = playersWaiting.slice(0, 10).filter((player: string) => {
-        const playerSocket = io.sockets.sockets.get(player);
+      const players = playersWaiting.slice(0, 10).filter((player: Player) => {
+        const playerSocket = io.sockets.sockets.get(player.playerId);
         return playerSocket?.connected;
       });
       const gameId = uuidv4();
@@ -220,7 +228,7 @@ nextApp.prepare().then(() => {
       gameRooms.set(levelName, levelData);
       // let all players know the game config
       players.map((player) => {
-        socket.to(player).emit("gameData", { gameId, ...gameData });
+        socket.to(player.playerId).emit("gameData", { gameId, ...gameData });
       });
     };
 

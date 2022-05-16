@@ -12,9 +12,14 @@ import { DefaultEventsMap } from "socket.io/dist/typed-events";
 import socket from "socket.io-client";
 import { sharedInstance as events } from "../EventCenter";
 
+type Player = {
+  playerId: string;
+  account?: string | undefined;
+};
+
 interface GameLevelData {
   gameId: string;
-  players: string[];
+  players: Player[];
   gameState: "waiting" | "runnning" | "end";
 }
 
@@ -71,8 +76,8 @@ export default class LavaScene extends Phaser.Scene {
       });
       this.otherPlayers.clear();
       // map through existing players and add to game list
-      gameData.players.map((otherPlayer: string, index: number) => {
-        if (this.socket.id === otherPlayer) {
+      gameData.players.map((otherPlayer: Player, index: number) => {
+        if (this.socket.id === otherPlayer.playerId) {
           // if the first to join the game - set the wait time
           if (index === 0 && !this.timer) {
             this.timer = this.time.addEvent({
@@ -86,7 +91,7 @@ export default class LavaScene extends Phaser.Scene {
         }
         const player = this.add.sprite(0, 0, "coolLink", "idle_01.png");
         player.setAlpha(0.5);
-        this.otherPlayers.set(otherPlayer, player);
+        this.otherPlayers.set(otherPlayer.playerId, player);
       });
 
       // setup channels to listen on..
@@ -99,8 +104,8 @@ export default class LavaScene extends Phaser.Scene {
         });
         this.otherPlayers.clear();
         // map through existing players and add to game list
-        data.players.map((otherPlayer: string, index: number) => {
-          if (this.socket.id === otherPlayer) {
+        data.players.map((otherPlayer: Player, index: number) => {
+          if (this.socket.id === otherPlayer.playerId) {
             // if the first to join the game - set the wait time
             if (index === 0 && !this.timer) {
               this.timer = this.time.addEvent({
@@ -114,7 +119,7 @@ export default class LavaScene extends Phaser.Scene {
           }
           const player = this.add.sprite(0, 0, "coolLink", "idle_01.png");
           player.setAlpha(0.5);
-          this.otherPlayers.set(otherPlayer, player);
+          this.otherPlayers.set(otherPlayer.playerId, player);
         });
       });
 
