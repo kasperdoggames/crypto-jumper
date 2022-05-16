@@ -28,13 +28,13 @@ export default class UI extends Scene {
     exitButton.setInteractive();
     exitButton.on("pointerover", () => {
       exitButton
-        // .setFont("280%")
+        .setFontSize(24)
         .setPosition(this.game.renderer.width - 160, 20);
     });
 
     exitButton.on("pointerout", () => {
       exitButton
-        // .setFont("250%")
+        .setFontSize(20)
         .setPosition(this.game.renderer.width - 150, 20);
     });
 
