@@ -1,9 +1,13 @@
 import "phaser";
+import { createButton } from "../elements/ui/CustomButton";
 
 export default class MainMenu extends Phaser.Scene {
   preload() {
     this.load.image("volcano_bg", "assets/volcano_bg.png");
     this.load.image("logo", "assets/logo.png");
+    this.load.image("button1", "assets/ui/blue_button01.png");
+    this.load.image("button2", "assets/ui/blue_button02.png");
+    this.load.image("button3", "assets/ui/blue_button03.png");
   }
 
   create() {
@@ -14,37 +18,19 @@ export default class MainMenu extends Phaser.Scene {
       "logo"
     );
 
-    const playButton = this.add.text(
-      this.game.renderer.width / 2 - 50,
+    createButton(
+      this,
+      this.game.renderer.width / 2,
       this.game.renderer.height * 0.7,
-      "< Play >",
       {
-        fontSize: "250%",
+        defaultImageName: "button2",
+        hoverImageName: "button3",
+        clickImageName: "button1",
+        label: "Start",
+      },
+      () => {
+        this.scene.start("lavaScene");
       }
     );
-
-    playButton.setInteractive();
-
-    playButton.on("pointerover", () => {
-      playButton
-        .setFont("280%")
-        .setPosition(
-          this.game.renderer.width / 2 - 60,
-          this.game.renderer.height * 0.7
-        );
-    });
-
-    playButton.on("pointerout", () => {
-      playButton
-        .setFont("250%")
-        .setPosition(
-          this.game.renderer.width / 2 - 50,
-          this.game.renderer.height * 0.7
-        );
-    });
-
-    playButton.on("pointerup", () => {
-      this.scene.start("lavaScene");
-    });
   }
 }

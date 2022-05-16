@@ -69,6 +69,7 @@ export default class LavaScene extends Phaser.Scene {
 
     // wait for response from server on game object
     this.socket.on("gameData", (gameData: GameLevelData) => {
+      this.scene.launch("dialog");
       this.gameId = gameData.gameId;
       // refresh all players
       this.otherPlayers.forEach((player) => {
@@ -144,7 +145,11 @@ export default class LavaScene extends Phaser.Scene {
         events.emit("countdown", this.counter);
       });
 
-      this.loading = false;
+      // testing loading from button click
+      events.on("playerAdded", () => {
+        console.log("player added");
+        this.loading = false;
+      });
     });
 
     this.socket.on("dead", (data: any) => {
@@ -157,21 +162,23 @@ export default class LavaScene extends Phaser.Scene {
   }
 
   updateCounter() {
-    this.counter--;
-    events.emit("countdown", this.counter);
-    this.socket.emit("countdown", {
-      level: "lava",
-      gameId: this.gameId,
-      counter: this.counter,
-    });
-
-    if (this.counter < 0) {
-      this.timer.destroy();
-      this.socket.emit("gameUpdate", {
-        level: this.level,
+    if (!this.loading) {
+      this.counter--;
+      events.emit("countdown", this.counter);
+      this.socket.emit("countdown", {
+        level: "lava",
         gameId: this.gameId,
-        state: "running",
+        counter: this.counter,
       });
+
+      if (this.counter < 0) {
+        this.timer.destroy();
+        this.socket.emit("gameUpdate", {
+          level: this.level,
+          gameId: this.gameId,
+          state: "running",
+        });
+      }
     }
   }
 

@@ -3,6 +3,9 @@ import next from "next";
 import { Server } from "socket.io";
 import http from "http";
 import { v4 as uuidv4 } from "uuid";
+import { P2EGAME_CONTRACT_ADDRESS } from "./support/contract_addresses";
+import P2EGameJson from "./support/P2EGame.json";
+import { ethers } from "ethers";
 
 const dev = process.env.NODE_ENV !== "production";
 const nextApp = next({ dev });
@@ -29,6 +32,19 @@ interface PlayerUpdateData {
 }
 
 nextApp.prepare().then(() => {
+  const getP2EGameContract = () => {
+    const provider = new ethers.providers.JsonRpcProvider(
+      "https://polygon-mumbai.g.alchemy.com/v2/A0ILlbpO9xF7SXsx642ICtBfn8hQkZBK"
+    );
+    const p2eGameContract = new ethers.Contract(
+      P2EGAME_CONTRACT_ADDRESS,
+      P2EGameJson.abi,
+      provider
+    );
+
+    return p2eGameContract;
+  };
+
   const app: Express = express();
   const server = http.createServer(app);
   const io = new Server(server);
@@ -53,37 +69,35 @@ nextApp.prepare().then(() => {
 
   app.set("port", process.env.PORT || 3000);
 
-  // call contract for state and update gameState var
-  /*
-    gameSate =  p2eGameContract.getGameSessionState();
-  */
+  // call contract for state
+  const p2eGameContract = getP2EGameContract() as any;
 
-  // start listener to contract..
+  if (p2eGameContract) {
+    // start listener to contract..
+    gameState = p2eGameContract.getGameSessionState;
 
-  /*
-     test via simulator....
+    p2eGameContract.on("NewGame", (gameId: any) => {
+      gameState = "new";
+      io.emit("newGame", { gameId });
+    });
 
-      p2eGameContract.on("newGame", (gameId: any) => {
-        gameState = "new"
-        io.emit("newGame", {gameId}))
-      })
+    p2eGameContract.on("GameStarted", (gameId: any) => {
+      gameState = "started";
+    });
 
-       p2eGameContract.on("gameStarted", (gameId: any) => {
-        gameState = "started"
-      })
+    p2eGameContract.on("GameFinished", (gameId: any) => {
+      gameState = "finished";
+    });
 
-       p2eGameContract.on("gameFinished", (gameId: any) => {
-        gameState = "finished"
-      })
+    p2eGameContract.on("GameSettled", (gameId: any) => {});
 
-       p2eGameContract.on("gameSettled", (gameId: any) => {
-         
-      })
-
-      p2eGameContract.on("PlayerJoinedGame", (address, clientId) => {
+    p2eGameContract.on(
+      "PlayerJoinedGame",
+      (address: string, clientId: string) => {
         console.log("PlayerJoinedGame", address, clientId);
-      });
-    */
+      }
+    );
+  }
 
   io.on("connection", async (socket) => {
     console.log("a user connected", socket.id);

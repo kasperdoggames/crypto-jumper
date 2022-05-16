@@ -3,6 +3,7 @@ import "phaser";
 import UI from "./scenes/UIScene";
 import LavaScene from "./scenes/LavaScene";
 import MainMenu from "./scenes/MainMenuScene";
+import Dialog from "./scenes/DialogScene";
 
 let game: Phaser.Game;
 
@@ -55,6 +56,7 @@ const GameManager = () => {
     game.scene.add("main", MainMenu);
     game.scene.add("lavaScene", LavaScene);
     game.scene.add("ui", UI);
+    game.scene.add("dialog", Dialog);
     game.scene.start("main");
   };
 
