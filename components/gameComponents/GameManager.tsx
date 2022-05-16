@@ -7,6 +7,8 @@ import Dialog from "./scenes/DialogScene";
 
 let game: Phaser.Game;
 
+const GAME_WIDTH = 1280;
+
 const GameManager = () => {
   useEffect(() => {
     loadGame();
@@ -19,7 +21,7 @@ const GameManager = () => {
 
     const config = {
       type: Phaser.AUTO,
-      width: window.innerWidth - 500,
+      width: GAME_WIDTH,
       height: window.innerHeight - 100,
       backgroundColor: "#4488aa",
       physics: {
@@ -48,7 +50,7 @@ const GameManager = () => {
     window.addEventListener(
       "resize",
       () => {
-        game.scale.resize(window.innerWidth - 500, window.innerHeight);
+        game.scale.resize(GAME_WIDTH, window.innerHeight);
       },
       false
     );
