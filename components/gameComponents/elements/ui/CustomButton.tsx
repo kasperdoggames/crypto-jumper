@@ -21,7 +21,9 @@ export const createButton = (
   const clickImage = scene.add.image(0, 0, clickImageName).setVisible(false);
   const hoverImage = scene.add.image(0, 0, hoverImageName).setVisible(false);
 
-  const buttonLabel = scene.add.text(0, 0, label).setOrigin(0.5);
+  const buttonLabel = scene.add
+    .text(0, 0, label, { fontFamily: "Splatch" })
+    .setOrigin(0.5, 0.6);
 
   const button = scene.add.container(xLoc, yLoc);
 
