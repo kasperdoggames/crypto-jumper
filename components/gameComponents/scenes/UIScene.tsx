@@ -14,19 +14,27 @@ export default class UI extends Scene {
   }
 
   create() {
-    const exitButton = this.add
-      .text(this.game.renderer.width - 150, 20, "< Quit >")
-      .setFont("250%");
+    const exitButton = this.add.text(
+      this.game.renderer.width - 150,
+      20,
+      "< Quit >",
+      {
+        fontSize: "20px",
+        color: "#fff",
+        fontFamily: "Splatch",
+      }
+    );
+    // .setFont("250%");
     exitButton.setInteractive();
     exitButton.on("pointerover", () => {
       exitButton
-        .setFont("280%")
+        // .setFont("280%")
         .setPosition(this.game.renderer.width - 160, 20);
     });
 
     exitButton.on("pointerout", () => {
       exitButton
-        .setFont("250%")
+        // .setFont("250%")
         .setPosition(this.game.renderer.width - 150, 20);
     });
 
@@ -52,17 +60,20 @@ export default class UI extends Scene {
     this.coinCount = this.add.text(20, 20, displayCoinCount(), {
       fontSize: "20px",
       color: "#fff",
+      fontFamily: "Splatch",
     });
 
     this.countdownText = this.add.text(180, 150, "Waiting for available game", {
       fontSize: "30px",
       color: "#fff",
+      fontFamily: "Splatch",
     });
 
     this.playerMessage = this.add
       .text(180, 150, "", {
         fontSize: "30px",
         color: "#fff",
+        fontFamily: "Splatch",
       })
       .setAlpha(0);
 
