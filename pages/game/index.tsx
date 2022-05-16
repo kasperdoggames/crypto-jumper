@@ -62,9 +62,13 @@ const Home: NextPage = () => {
     }
     const contract = getGameNFTTokenContract(ethereum);
     if (contract && cryptAccount?.address) {
-      const tokenCount = await contract.balanceOf(cryptAccount.address);
-      if (tokenCount > 0) {
-        setHasNFT(true);
+      try {
+        const tokenCount = await contract.balanceOf(cryptAccount.address);
+        if (tokenCount > 0) {
+          setHasNFT(true);
+        }
+      } catch (err) {
+        console.log("error on balanceOf: ", err);
       }
     }
   };
