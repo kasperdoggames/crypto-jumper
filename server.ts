@@ -13,7 +13,7 @@ const handle = nextApp.getRequestHandler();
 
 type Player = {
   playerId: string;
-  account?: string | undefined;
+  walletAddress?: string | undefined;
 };
 
 interface GameLevelData {
@@ -36,12 +36,14 @@ nextApp.prepare().then(() => {
     const provider = new ethers.providers.JsonRpcProvider(
       "https://polygon-mumbai.g.alchemy.com/v2/A0ILlbpO9xF7SXsx642ICtBfn8hQkZBK"
     );
+    const signer = provider.getSigner(
+      "0x1CFA7631E9a08bc4393D41A5246Eb6aEdA781231"
+    );
     const p2eGameContract = new ethers.Contract(
       P2EGAME_CONTRACT_ADDRESS,
       P2EGameJson.abi,
-      provider
+      signer
     );
-
     return p2eGameContract;
   };
 
@@ -63,30 +65,98 @@ nextApp.prepare().then(() => {
 
   const gameRooms = new Map<string, Map<string, GameLevelData>>();
   const playersWaiting: Player[] = [];
-  const assignedPlayers = new Map<string, string>();
+  const assignedPlayers = new Map<
+    string,
+    { room: string; walletAddress?: string }
+  >();
 
-  let gameState: "begin" | "new" | "started" | "finished";
+  type GameSates = "Begin" | "New" | "Started" | "Finished";
+
+  const GameSessionStateEnum: {
+    [key: number]: GameSates;
+  } = {
+    0: "Begin",
+    1: "New",
+    2: "Started",
+    3: "Finished",
+  };
+
+  let gameState: "Begin" | "New" | "Started" | "Finished";
 
   app.set("port", process.env.PORT || 3000);
 
   // call contract for state
   const p2eGameContract = getP2EGameContract() as any;
 
+  const resetGame = (levelName: string, oldGameId: string) => {
+    const levelData = gameRooms.get(levelName);
+    if (!levelData) {
+      console.log("no level data");
+      return;
+    }
+    levelData.delete(oldGameId);
+    const players = playersWaiting.slice(0, 10).filter((player: Player) => {
+      const playerSocket = io.sockets.sockets.get(player.playerId);
+      return playerSocket?.connected;
+    });
+    const gameId = uuidv4();
+    const gameData: GameLevelData = {
+      players,
+      gameState: "waiting",
+    };
+    levelData.set(gameId, gameData);
+    gameRooms.set(levelName, levelData);
+  };
+
+  const createLevel = (
+    roomRequested: string,
+    socketId: string,
+    address: string
+  ) => {
+    const gameId = uuidv4();
+    const gameData: GameLevelData = {
+      players: [{ playerId: socketId, walletAddress: address }],
+      gameState: "waiting",
+    };
+    const newSlot = new Map<string, GameLevelData>();
+    newSlot.set(gameId, gameData);
+    gameRooms.set(roomRequested, newSlot);
+    assignedPlayers.set(socketId, {
+      room: `${roomRequested}_${gameId}`,
+      walletAddress: address,
+    });
+  };
+
   if (p2eGameContract) {
     // start listener to contract..
-    gameState = p2eGameContract.getGameSessionState;
 
     p2eGameContract.on("NewGame", (gameId: any) => {
-      gameState = "new";
+      gameState = "New";
+      console.log("emitting newgame");
       io.emit("newGame", { gameId });
     });
 
     p2eGameContract.on("GameStarted", (gameId: any) => {
-      gameState = "started";
+      gameState = "Started";
+      const roomRequested = "lava";
+      const levelData = gameRooms.get(roomRequested);
+      if (!levelData || levelData.size === 0) {
+        return;
+      }
+      const lastSlot = Array.from(levelData).pop();
+
+      if (!lastSlot) {
+        console.log("no slot found");
+        return;
+      }
+
+      io.emit("gameData", { gameId: lastSlot[0], ...lastSlot[1] });
+      // broadcast for any other players on same channel
+      // io.emit(`${roomRequested}_${lastSlot[0]}`, lastSlot[1]);
     });
 
     p2eGameContract.on("GameFinished", (gameId: any) => {
-      gameState = "finished";
+      gameState = "Finished";
     });
 
     p2eGameContract.on("GameSettled", (gameId: any) => {});
@@ -95,94 +165,62 @@ nextApp.prepare().then(() => {
       "PlayerJoinedGame",
       (address: string, clientId: string) => {
         console.log("PlayerJoinedGame", address, clientId);
+
+        // find socketid and add account
+        // check if socketId is still connected
+
+        const roomRequested = "lava";
+        const levelData = gameRooms.get(roomRequested);
+        // if no level, create one and add player to slot 1
+        if (!levelData || levelData.size === 0) {
+          createLevel(roomRequested, clientId, address);
+          return;
+        }
+        // else check player count in last slot
+        const lastSlot = Array.from(levelData).pop();
+        if (!lastSlot) {
+          createLevel(roomRequested, clientId, address);
+          return;
+        }
+        lastSlot[1].players = lastSlot[1].players.filter((player) => {
+          const playerSocket = io.sockets.sockets.get(player.playerId);
+          return playerSocket?.connected;
+        });
+        if (lastSlot[1].players.length === 0) {
+          createLevel(roomRequested, clientId, address);
+          return;
+        }
+        if (
+          lastSlot[1].players.length >= 10 ||
+          lastSlot[1].gameState === "end" ||
+          lastSlot[1].gameState === "running"
+        ) {
+          // add to queue of waiting users
+          playersWaiting.push({ playerId: clientId, walletAddress: address });
+          return;
+        }
+        lastSlot[1].players.push({
+          walletAddress: address,
+          playerId: clientId,
+        });
+        levelData.set(lastSlot[0], lastSlot[1]);
+        gameRooms.set(roomRequested, levelData);
+        assignedPlayers.set(clientId, {
+          room: `${roomRequested}_${lastSlot[0]}`,
+          walletAddress: address,
+        });
       }
     );
   }
 
   io.on("connection", async (socket) => {
     console.log("a user connected", socket.id);
-
-    if (gameState === "new") {
+    const res: number = await p2eGameContract.gameSessionState();
+    gameState = GameSessionStateEnum[res];
+    console.log({ gameState });
+    if (gameState === "New") {
       io.emit("newGame");
     }
-
-    const createLevel = (roomRequested: string) => {
-      const gameId = uuidv4();
-      const gameData: GameLevelData = {
-        players: [{ playerId: socket.id }],
-        gameState: "waiting",
-      };
-      const newSlot = new Map<string, GameLevelData>();
-      newSlot.set(gameId, gameData);
-      gameRooms.set(roomRequested, newSlot);
-      assignedPlayers.set(socket.id, `${roomRequested}_${gameId}`);
-      // emit game data back to client to allow it to listen on the gameId for updates
-      console.log("emit game data");
-      socket.emit("gameData", { gameId, ...gameData });
-      // broadcast for any other players on same channel
-      socket.broadcast.emit(`${roomRequested}_${gameId}`, {
-        gameId,
-        ...gameData,
-      });
-    };
-
-    socket.on("gameRequest", (roomRequested: string) => {
-      // look for existing level
-      const levelData = gameRooms.get(roomRequested);
-      // if no level, create one and add player to slot 1
-      if (!levelData || levelData.size === 0) {
-        createLevel(roomRequested);
-        return;
-      }
-      // else check player count in last slot
-      const lastSlot = Array.from(levelData).pop();
-      if (!lastSlot) {
-        createLevel(roomRequested);
-        return;
-      }
-      lastSlot[1].players = lastSlot[1].players.filter((player) => {
-        const playerSocket = io.sockets.sockets.get(player.playerId);
-        return playerSocket?.connected;
-      });
-      if (lastSlot[1].players.length === 0) {
-        createLevel(roomRequested);
-        return;
-      }
-      if (
-        lastSlot[1].players.length >= 10 ||
-        lastSlot[1].gameState === "end" ||
-        lastSlot[1].gameState === "running"
-      ) {
-        // // create a new slot for users if multiple game sessions
-        // const gameId = uuidv4();
-        // const gameData: GameLevelData = {
-        //   players: [socket.id],
-        //   gameState: "waiting",
-        // };
-        // levelData.set(gameId, gameData);
-        // gameRooms.set(roomRequested, levelData);
-        // // emit game data back to client to allow it to listen on the gameId for updates
-        // socket.emit("gameData", { gameId, ...gameData });
-        // // broadcast for any other players on same channel
-        // socket.broadcast.emit(`${roomRequested}_${gameId}`, {
-        //   gameId,
-        //   ...gameData,
-        // });
-
-        // add to queue of waiting users
-        playersWaiting.push({ playerId: socket.id });
-        return;
-      }
-      lastSlot[1].players.push({
-        playerId: socket.id,
-      });
-      levelData.set(lastSlot[0], lastSlot[1]);
-      gameRooms.set(roomRequested, levelData);
-      assignedPlayers.set(socket.id, `${roomRequested}_${lastSlot[0]}`);
-      socket.emit("gameData", { gameId: lastSlot[0], ...lastSlot[1] });
-      // broadcast for any other players on same channel
-      socket.broadcast.emit(`${roomRequested}_${lastSlot[0]}`, lastSlot[1]);
-    });
 
     /*
     client provides player update providing the gameId and level name:
@@ -222,36 +260,12 @@ nextApp.prepare().then(() => {
       }
     );
 
-    const resetGame = (levelName: string, oldGameId: string) => {
-      const levelData = gameRooms.get(levelName);
-      if (!levelData) {
-        console.log("no level data");
-        return;
-      }
-      levelData.delete(oldGameId);
-      const players = playersWaiting.slice(0, 10).filter((player: Player) => {
-        const playerSocket = io.sockets.sockets.get(player.playerId);
-        return playerSocket?.connected;
-      });
-      const gameId = uuidv4();
-      const gameData: GameLevelData = {
-        players,
-        gameState: "waiting",
-      };
-      levelData.set(gameId, gameData);
-      gameRooms.set(levelName, levelData);
-      // let all players know the game config
-      players.map((player) => {
-        socket.to(player.playerId).emit("gameData", { gameId, ...gameData });
-      });
-    };
-
     /*
       client provides game updates for game state
     */
     socket.on(
       "gameUpdate",
-      (data: {
+      async (data: {
         level: string;
         gameId: string;
         state: "waiting" | "end" | "running";
@@ -265,7 +279,21 @@ nextApp.prepare().then(() => {
           return;
         }
         if (data.state === "end") {
-          resetGame(data.level, data.gameId);
+          const playerData = assignedPlayers.get(socket.id);
+          if (!playerData) {
+            return;
+          }
+          const wallet = playerData.walletAddress;
+          if (!wallet) {
+            console.log("No wallet found");
+            return;
+          }
+
+          const tx = await p2eGameContract.playerWon(wallet);
+
+          console.log({ tx });
+          const res = await tx.wait();
+          console.log({ res });
           return;
         }
         gameData.gameState = data.state;
@@ -274,13 +302,6 @@ nextApp.prepare().then(() => {
       }
     );
 
-    socket.on("winner", async (data: any) => {
-      console.log("winner");
-      // pass on data.account for wallet
-      // to do call contract with user account/wallet address
-      // ethers call to contracts
-    });
-
     socket.on("disconnect", () => {
       console.log("client disconnected", socket.id);
       const game = assignedPlayers.get(socket.id);
@@ -288,7 +309,7 @@ nextApp.prepare().then(() => {
         return;
       }
       assignedPlayers.delete(socket.id);
-      const split = game.split("_");
+      const split = game.room.split("_");
       const [levelName, gameId] = split;
       const level = gameRooms.get(levelName);
       if (!level) {
@@ -300,6 +321,7 @@ nextApp.prepare().then(() => {
       }
       if (gameData.players.length > 1) {
         socket.broadcast.emit("dead", { id: socket.id });
+        // todo update gameData to remove player and update Map
       } else {
         resetGame(levelName, gameId);
       }

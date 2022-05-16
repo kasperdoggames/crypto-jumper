@@ -39,7 +39,6 @@ export const createButton = (
       Phaser.Geom.Rectangle.Contains
     )
     .on("pointerup", () => {
-      console.log("button pushed");
       cb();
     })
     .on("pointerover", () => {

@@ -31,9 +31,9 @@ export default class Dialog extends Scene {
           ) as LavaScene;
           const clientId = lavaScene.socket.id;
           const tx = await p2eGameContract.addPlayerToGameSession(clientId);
-          console.log(tx);
+          console.log({ tx });
           const receipt = await tx.wait();
-          console.log(receipt);
+          console.log({ receipt });
         } catch (e) {
           console.log(e);
         }

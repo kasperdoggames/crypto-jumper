@@ -5,9 +5,15 @@ import { useAccount, useNetwork } from "wagmi";
 import { useEffect, useState } from "react";
 import { BaseProvider } from "@ethersproject/providers";
 import { GetAccountResult } from "@wagmi/core";
-import { getGameNFTTokenContract, getP2EGameContract } from "../../support/eth";
+import {
+  getGameNFTTokenContract,
+  getP2EGameContract,
+  getGameTokenContract,
+} from "../../support/eth";
 import { ethers } from "ethers";
 import Navbar from "../../components/Navbar";
+import LoadingScreen from "../../components/Loading";
+import { P2EGAME_CONTRACT_ADDRESS } from "../../support/contract_addresses";
 
 const Home: NextPage = () => {
   const [cryptAccount, setCryptAccount] =
@@ -16,6 +22,10 @@ const Home: NextPage = () => {
   const { data: account } = useAccount();
   const { activeChain } = useNetwork();
   const [hasNFT, setHasNFT] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [gameTokenBalance, setGameTokenBalance] = useState<number | null>(null);
+  const [gameAllowance, setGameAllowance] = useState<number | null>(null);
+  const [tokensStaked, setTokensStaked] = useState(0);
 
   useEffect(() => {
     if (account) {
@@ -24,7 +34,7 @@ const Home: NextPage = () => {
   }, [account]);
 
   useEffect(() => {
-    checkNFT();
+    init();
   }, [cryptAccount]);
 
   // Dynamic Loader to wait before loaing up the phaser game
@@ -37,6 +47,7 @@ const Home: NextPage = () => {
   );
 
   const handleMintNFT = async () => {
+    setIsLoading(true);
     const { ethereum } = window;
     const p2eGameContract = getP2EGameContract(ethereum);
     if (p2eGameContract) {
@@ -49,7 +60,9 @@ const Home: NextPage = () => {
         const receipt = await tx.wait();
         console.log(receipt);
         setHasNFT(true);
+        setIsLoading(false);
       } catch (e) {
+        setIsLoading(false);
         console.log(e);
       }
     }
@@ -64,7 +77,7 @@ const Home: NextPage = () => {
     if (contract && cryptAccount?.address) {
       try {
         const tokenCount = await contract.balanceOf(cryptAccount.address);
-        if (tokenCount > 0) {
+        if (tokenCount.toNumber() > 0) {
           setHasNFT(true);
         }
       } catch (err) {
@@ -73,7 +86,63 @@ const Home: NextPage = () => {
     }
   };
 
-  // todo check claims
+  const fetchPlayerTokenBalance = async () => {
+    const { ethereum } = window;
+    const gameTokenContract = getGameTokenContract(ethereum);
+    if (gameTokenContract && cryptAccount) {
+      const balance = await gameTokenContract.balanceOf(cryptAccount.address);
+      let res = Number(ethers.utils.formatUnits(balance, 18));
+      res = Math.round(res * 1e4) / 1e4;
+      setGameTokenBalance(res);
+    }
+  };
+
+  const fetchPlayerTokenAllowance = async () => {
+    const { ethereum } = window;
+    const gameTokenContract = getGameTokenContract(ethereum);
+    if (gameTokenContract && cryptAccount) {
+      const allowance = await gameTokenContract.allowance(
+        cryptAccount.address,
+        P2EGAME_CONTRACT_ADDRESS
+      );
+      let res = Number(ethers.utils.formatUnits(allowance, 18));
+      res = Math.round(res * 1e4) / 1e4;
+      console.log("gameAllowance: ", res);
+      setGameAllowance(res);
+    }
+  };
+
+  const init = async () => {
+    setIsLoading(true);
+    await checkNFT();
+    await fetchPlayerTokenBalance();
+    await fetchPlayerTokenAllowance();
+    setIsLoading(false);
+  };
+
+  const handleStakeFunds = async () => {
+    const { ethereum } = window;
+    const gameTokenContract = getGameTokenContract(ethereum);
+    if (gameTokenContract) {
+      console.log("approve");
+      try {
+        setIsLoading(true);
+        const tx = await gameTokenContract.approve(
+          P2EGAME_CONTRACT_ADDRESS,
+          ethers.utils.parseEther(tokensStaked.toString())
+        );
+        console.log(tx);
+        const receipt = await tx.wait();
+        console.log(receipt);
+        setGameAllowance(tokensStaked);
+        setIsLoading(false);
+      } catch (e) {
+        console.log(e);
+        setIsLoading(false);
+      }
+    }
+  };
+
   return (
     <div className="bg-gray-900">
       {/* https://stackoverflow.com/questions/51217147/how-to-use-a-local-font-in-phaser-3 */}
@@ -100,6 +169,7 @@ const Home: NextPage = () => {
           </Head>
           <Navbar currentPageHref="game" />
           <div className="flex flex-col items-center h-screen bg-gray-700">
+            <LoadingScreen isLoading={isLoading} />
             {cryptAccount && !activeChain?.unsupported ? (
               <div>
                 {!hasNFT ? (
@@ -109,6 +179,59 @@ const Home: NextPage = () => {
                   >
                     Mint NFT
                   </button>
+                ) : !gameAllowance || gameAllowance <= 0 ? (
+                  <div className="text-center items-center">
+                    <p className="pt-2 text-xl text-white font-splatch">
+                      Stake tokens to play the game
+                    </p>
+
+                    <div className="flex flex-row w-full h-10 mt-4 bg-transparent rounded-lg">
+                      <button
+                        type="button"
+                        className="w-20 h-full text-gray-600 bg-gray-300 rounded-none rounded-l cursor-pointer focus:outline-none hover:text-gray-900"
+                        onClick={() => {
+                          const updatedTokensStaked = tokensStaked - 1;
+                          setTokensStaked(
+                            updatedTokensStaked < 0 ? 0 : updatedTokensStaked
+                          );
+                        }}
+                      >
+                        <span className="block pb-1 m-auto text-2xl">−</span>
+                      </button>
+                      <input
+                        id="custom-input-number"
+                        type="number"
+                        className="flex items-center w-full font-semibold text-center text-gray-900 bg-gray-300 rounded-none outline-none focus:outline-none text-md md:text-basecursor-default"
+                        name="custom-input-number"
+                        value={tokensStaked}
+                        readOnly
+                      ></input>
+                      <button
+                        className="w-20 h-full text-gray-600 bg-gray-300 rounded-none rounded-r cursor-pointer focus:outline-none hover:text-gray-900"
+                        type="button"
+                        onClick={() => {
+                          if (!gameTokenBalance) {
+                            setTokensStaked(0);
+                            return;
+                          }
+                          const updatedTokensStaked = tokensStaked + 1;
+                          setTokensStaked(
+                            updatedTokensStaked > gameTokenBalance
+                              ? gameTokenBalance
+                              : updatedTokensStaked
+                          );
+                        }}
+                      >
+                        <span className="block pb-1 m-auto text-2xl">+</span>
+                      </button>
+                    </div>
+                    <button
+                      className="px-4 py-4 mt-2 font-bold text-white bg-green-600 rounded-xl hover:bg-green-100 hover:text-green-400"
+                      onClick={handleStakeFunds}
+                    >
+                      Stake Funds
+                    </button>
+                  </div>
                 ) : (
                   <>
                     <div id="game"></div>

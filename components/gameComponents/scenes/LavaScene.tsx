@@ -52,24 +52,20 @@ export default class LavaScene extends Phaser.Scene {
     // set loading is true while obtaining list of other players
     this.loading = true;
 
-    this.socket.on("connect", () => {
-      // get a game object to listen to for the duration of game
-
-      // this will not be needed once contract fires newGame
-      console.log("requesting game");
-      this.socket.emit("gameRequest", "lava");
-    });
+    // this.socket.on("connect", () => {
+    //   // get a game object to listen to for the duration of game
+    //   // this will not be needed once contract fires newGame
+    //   console.log("requesting game");
+    //   this.socket.emit("gameRequest", "lava");
+    // });
 
     this.socket.on("newGame", () => {
-      // todo: open a dialog to say game available
-      // add yourself to game
-      // button to add me to game.. call addPlayerToGame
-      // socketId to add as param
+      this.scene.launch("dialog");
     });
 
     // wait for response from server on game object
     this.socket.on("gameData", (gameData: GameLevelData) => {
-      this.scene.launch("dialog");
+      console.log("gameData received: ", { gameData });
       this.gameId = gameData.gameId;
       // refresh all players
       this.otherPlayers.forEach((player) => {
@@ -93,6 +89,7 @@ export default class LavaScene extends Phaser.Scene {
         const player = this.add.sprite(0, 0, "coolLink", "idle_01.png");
         player.setAlpha(0.5);
         this.otherPlayers.set(otherPlayer.playerId, player);
+        this.loading = false;
       });
 
       // setup channels to listen on..
@@ -148,7 +145,6 @@ export default class LavaScene extends Phaser.Scene {
       // testing loading from button click
       events.on("playerAdded", () => {
         console.log("player added");
-        this.loading = false;
       });
     });
 
@@ -237,8 +233,8 @@ export default class LavaScene extends Phaser.Scene {
     this.bg_1 = this.add.tileSprite(
       0,
       0,
-      Number(this.game.config.width),
-      Number(this.game.config.height),
+      Number(this.game.renderer.width),
+      Number(this.game.renderer.height),
       "bg_1"
     );
     this.bg_1.setOrigin(0, 0);
