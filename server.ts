@@ -136,7 +136,7 @@ nextApp.prepare().then(() => {
       const filterPlayerWon = p2eGameContract.filters.PlayerWon(null);
       const items = await p2eGameContract.queryFilter(
         filterPlayerWon,
-        26276877
+        26355256
       );
 
       const filtered = items.map((item: any) => {

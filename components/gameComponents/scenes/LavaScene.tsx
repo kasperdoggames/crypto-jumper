@@ -54,7 +54,7 @@ export default class LavaScene extends Phaser.Scene {
     this.loading = true;
 
     this.socket.on("newGame", () => {
-      console.log("newGame recieved");
+      console.log("newGame received");
       this.emitMessages.push({ key: "newGame", data: "" });
     });
 
