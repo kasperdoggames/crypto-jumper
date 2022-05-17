@@ -139,10 +139,8 @@ export class PlayerController {
         },
       });
       this.sprite.anims.play("melt").on("animationcomplete", () => {
-        this.socket.close();
         events.emit("playerMessage", "You Died");
-        window.location.reload();
-        // this.scene.scene.restart();
+        this.scene.counter = 10;
       });
     },
     execute: () => {},

@@ -131,10 +131,39 @@ nextApp.prepare().then(() => {
     });
   };
 
+  const getWinners = async () => {
+    if (p2eGameContract) {
+      const filterPlayerWon = p2eGameContract.filters.PlayerWon(null);
+      const items = await p2eGameContract.queryFilter(
+        filterPlayerWon,
+        26276877
+      );
+
+      const filtered = items.map((item: any) => {
+        return { playerAddress: item.args[0] };
+      });
+
+      console.log(filtered);
+
+      const aggregated = filtered.reduce((acc: any, current: any) => {
+        const address = current.playerAddress;
+        acc[address] = (acc[address] || 0) + 1;
+        return acc;
+      }, {});
+
+      const sorted = Object.entries(aggregated).sort(
+        ([, a]: any, [, b]: any) => b - a
+      );
+
+      return sorted.map((item) => ({ playerAddress: item[0], count: item[1] }));
+    }
+  };
+
   if (p2eGameContract) {
     // start listener to contract..
 
-    p2eGameContract.on("NewGame", (gameId: any) => {
+    p2eGameContract.on("GameSettled", (gameId: any) => {
+      console.log("NewGame recieved");
       gameState = "New";
       console.log("emitting newgame");
       io.emit("newGame", { gameId });
@@ -159,8 +188,28 @@ nextApp.prepare().then(() => {
       // io.emit(`${roomRequested}_${lastSlot[0]}`, lastSlot[1]);
     });
 
-    p2eGameContract.on("GameFinished", (gameId: any) => {
+    p2eGameContract.on("GameFinished", async (gameId: any) => {
       gameState = "Finished";
+      try {
+        const levelData = gameRooms.get("lava");
+        if (levelData) {
+          // todo: get recent winner and add to response
+          levelData.clear();
+          const gameId = uuidv4();
+          const gameData: GameLevelData = {
+            players: [],
+            gameState: "waiting",
+          };
+          levelData.set(gameId, gameData);
+          gameRooms.set("lava", levelData);
+        }
+        const leaderBoardData = await getWinners();
+        console.log({ leaderBoardData });
+        io.emit("gameEnd", { leaderBoardData });
+      } catch (err) {
+        console.log(err);
+        io.emit("gameEnd", {});
+      }
     });
 
     p2eGameContract.on("GameSettled", (gameId: any) => {});
@@ -294,10 +343,7 @@ nextApp.prepare().then(() => {
           }
 
           const tx = await p2eGameContract.playerWon(wallet);
-
-          console.log({ tx });
-          const res = await tx.wait();
-          console.log({ res });
+          await tx.wait();
           return;
         }
         gameData.gameState = data.state;

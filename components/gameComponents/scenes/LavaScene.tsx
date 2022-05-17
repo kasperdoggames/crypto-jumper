@@ -45,6 +45,7 @@ export default class LavaScene extends Phaser.Scene {
   timer!: Phaser.Time.TimerEvent;
   gameId!: string;
   level!: string;
+  emitMessages: { key: string; data: any }[] = [];
 
   loadFromSocket() {
     // load up socketIO
@@ -52,15 +53,9 @@ export default class LavaScene extends Phaser.Scene {
     // set loading is true while obtaining list of other players
     this.loading = true;
 
-    // this.socket.on("connect", () => {
-    //   // get a game object to listen to for the duration of game
-    //   // this will not be needed once contract fires newGame
-    //   console.log("requesting game");
-    //   this.socket.emit("gameRequest", "lava");
-    // });
-
     this.socket.on("newGame", () => {
-      this.scene.launch("dialog");
+      console.log("newGame recieved");
+      this.emitMessages.push({ key: "newGame", data: "" });
     });
 
     // wait for response from server on game object
@@ -141,11 +136,26 @@ export default class LavaScene extends Phaser.Scene {
         this.counter = counter;
         events.emit("countdown", this.counter);
       });
+    });
 
-      // testing loading from button click
-      events.on("playerAdded", () => {
-        console.log("player added");
+    this.socket.on("gameEnd", (gameData: any) => {
+      console.log("game end");
+      console.log({ gameData });
+      this.emitMessages.push({ key: "leaderBoard", data: gameData });
+      this.counter = 10;
+      this.timer = this.time.addEvent({
+        delay: 1000,
+        callback: () => {
+          this.counter--;
+          if (this.counter < 0) {
+            this.timer.destroy();
+            window.location.reload();
+          }
+        },
+        callbackScope: this,
+        loop: true,
       });
+      //todo: add leaderboard display and show who won this game
     });
 
     this.socket.on("dead", (data: any) => {
@@ -218,6 +228,7 @@ export default class LavaScene extends Phaser.Scene {
   create() {
     // Load UI
     this.scene.launch("ui");
+    this.scene.launch("dialog");
     // create coins class
     this.coins = new Coins(this);
     // create the tile map instance
@@ -391,6 +402,15 @@ export default class LavaScene extends Phaser.Scene {
   }
 
   update() {
+    if (this.emitMessages.length > 0) {
+      for (let i = 0; i < this.emitMessages.length; i++) {
+        const data = this.emitMessages.pop();
+        if (data) {
+          console.log("emit game: ", { data });
+          events.emit(data.key, data.data);
+        }
+      }
+    }
     if (this.loading || this.counter >= 0) {
       return;
     }

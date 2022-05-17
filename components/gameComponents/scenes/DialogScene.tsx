@@ -5,8 +5,6 @@ import LavaScene from "./LavaScene";
 import { sharedInstance as events } from "../EventCenter";
 
 export default class Dialog extends Scene {
-  coinCount!: Phaser.GameObjects.Text;
-
   constructor() {
     super({
       key: "dialog",
@@ -31,30 +29,57 @@ export default class Dialog extends Scene {
           ) as LavaScene;
           const clientId = lavaScene.socket.id;
           const tx = await p2eGameContract.addPlayerToGameSession(clientId);
-          console.log({ tx });
-          const receipt = await tx.wait();
-          console.log({ receipt });
+          await tx.wait();
         } catch (e) {
           console.log(e);
         }
       }
     };
 
-    const button = createButton(
-      this,
-      null,
-      null,
-      {
-        defaultImageName: "button2",
-        hoverImageName: "button3",
-        clickImageName: "button1",
-        label: "Add To Game",
-      },
-      async () => {
-        await addPlayer();
-        events.emit("playerAdded");
-        button.destroy();
-      }
-    );
+    events.on("newGame", () => {
+      const button = createButton(
+        this,
+        null,
+        null,
+        {
+          defaultImageName: "button2",
+          hoverImageName: "button3",
+          clickImageName: "button1",
+          label: "Add To Game",
+        },
+        async () => {
+          try {
+            await addPlayer();
+            events.emit("playerAdded");
+            button.destroy();
+          } catch (err) {
+            console.log(err);
+          }
+        }
+      );
+    });
+
+    events.on("leaderBoard", () => {
+      const { width, height } = this.sys.game.canvas;
+      const bg = this.add
+        .rectangle(0, 0, width, height, 0x000000, 0.8)
+        .setOrigin(0);
+      const box = this.add
+        .rectangle(this.game.renderer.width / 2, 300, 800, 400, 0xd0d0d0)
+        .setDepth(1);
+      const title = this.add
+        .text(this.game.renderer.width / 2, 120, "Leaderboard", {
+          fontFamily: "Splatch",
+        })
+        .setOrigin(0.5)
+        .setDepth(1.1);
+
+      const dataText = this.add
+        .text(this.game.renderer.width / 2, 200, "1: Player 1\n2: Player 2", {
+          fontFamily: "Splatch",
+        })
+        .setOrigin(0.5)
+        .setDepth(1.1);
+    });
   }
 }
