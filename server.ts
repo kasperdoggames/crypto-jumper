@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from "uuid";
 import { P2EGAME_CONTRACT_ADDRESS } from "./support/contract_addresses";
 import P2EGameJson from "./support/P2EGame.json";
 import { BytesLike, ethers } from "ethers";
+import forceSsl from "./support/forceSsl";
 
 const dev = process.env.NODE_ENV !== "production";
 const nextApp = next({ dev });
@@ -86,6 +87,7 @@ nextApp.prepare().then(() => {
   let gameState: "Begin" | "New" | "Started" | "Finished";
 
   app.set("port", process.env.PORT || 3000);
+  app.use(forceSsl);
 
   // call contract for state
   const p2eGameContract = getP2EGameContract() as any;
