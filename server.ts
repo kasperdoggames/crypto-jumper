@@ -5,7 +5,7 @@ import http from "http";
 import { v4 as uuidv4 } from "uuid";
 import { P2EGAME_CONTRACT_ADDRESS } from "./support/contract_addresses";
 import P2EGameJson from "./support/P2EGame.json";
-import { ethers } from "ethers";
+import { BytesLike, ethers } from "ethers";
 
 const dev = process.env.NODE_ENV !== "production";
 const nextApp = next({ dev });
@@ -36,8 +36,10 @@ nextApp.prepare().then(() => {
     const provider = new ethers.providers.JsonRpcProvider(
       "https://polygon-mumbai.g.alchemy.com/v2/A0ILlbpO9xF7SXsx642ICtBfn8hQkZBK"
     );
-    const signer = provider.getSigner(
-      "0x1CFA7631E9a08bc4393D41A5246Eb6aEdA781231"
+    const SIGNER_WALLET_KEY: BytesLike = process.env.SIGNER_WALLET_KEY || "";
+    const signer = new ethers.Wallet(
+      new ethers.utils.SigningKey(SIGNER_WALLET_KEY),
+      provider
     );
     const p2eGameContract = new ethers.Contract(
       P2EGAME_CONTRACT_ADDRESS,
