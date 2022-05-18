@@ -52,24 +52,24 @@ export default function Home() {
     });
 
     p2eGameContract.on("NewGame", (gameId) => {
-      console.log("PlayerWon", gameId);
+      console.log("PlayerWon", Number(gameId));
       fetchGameSessionState();
     });
 
     p2eGameContract.on("GameStarted", (gameId) => {
-      console.log("GameStarted", gameId);
+      console.log("GameStarted", Number(gameId));
       fetchGameSessionState();
       fetchPlayerTokenBalance();
     });
 
     p2eGameContract.on("GameFinished", (gameId) => {
-      console.log("GameFinished", gameId);
+      console.log("GameFinished", Number(gameId));
       fetchGameSessionState();
       fetchPlayerTokenBalance();
     });
 
     p2eGameContract.on("GameSettled", (gameId) => {
-      console.log("GameSettled", gameId);
+      console.log("GameSettled", Number(gameId));
       fetchGameSessionState();
     });
 
