@@ -17,10 +17,13 @@ type Player = {
   account?: string | undefined;
 };
 
+type gameState = "waiting" | "runnning" | "end";
+
 interface GameLevelData {
   gameId: string;
   players: Player[];
-  gameState: "waiting" | "runnning" | "end";
+  gameState: gameState;
+  winner?: Player;
 }
 
 interface PlayerData {
@@ -45,6 +48,7 @@ export default class LavaScene extends Phaser.Scene {
   timer!: Phaser.Time.TimerEvent;
   gameId!: string;
   level!: string;
+  gameState: gameState = "waiting";
   emitMessages: { key: string; data: any }[] = [];
 
   loadFromSocket() {
@@ -54,12 +58,17 @@ export default class LavaScene extends Phaser.Scene {
     this.loading = true;
 
     this.socket.on("newGame", () => {
-      console.log("newGame received");
-      this.emitMessages.push({ key: "newGame", data: "" });
+      if (this.gameState === "waiting") {
+        console.log("newGame received");
+        this.emitMessages.push({ key: "newGame", data: "" });
+      }
     });
 
     // wait for response from server on game object
     this.socket.on("gameData", (gameData: GameLevelData) => {
+      if (this.gameState !== "waiting") {
+        return;
+      }
       console.log("gameData received: ", { gameData });
       this.gameId = gameData.gameId;
       // refresh all players
@@ -84,6 +93,7 @@ export default class LavaScene extends Phaser.Scene {
         const player = this.add.sprite(0, 0, "coolLink", "idle_01.png");
         player.setAlpha(0.5);
         this.otherPlayers.set(otherPlayer.playerId, player);
+        this.gameState = "runnning";
         this.loading = false;
       });
 
@@ -91,6 +101,16 @@ export default class LavaScene extends Phaser.Scene {
 
       // listen on game data updates
       this.socket.on(`lava_${gameData.gameId}`, (data: GameLevelData) => {
+        if (data.gameState === "end" && this.gameState === "runnning") {
+          let isWinner = false;
+          console.log("awaiting results...");
+          if (data.winner && data.winner.playerId === this.socket.id) {
+            isWinner = true;
+          }
+          events.emit("awaitingResults", isWinner);
+          this.gameState = "end";
+          return;
+        }
         // refresh all players
         this.otherPlayers.forEach((player) => {
           player.destroy();
@@ -139,10 +159,12 @@ export default class LavaScene extends Phaser.Scene {
     });
 
     this.socket.on("gameEnd", (gameData: any) => {
+      if (this.gameState !== "end") {
+        return;
+      }
       console.log("game end");
-      console.log({ gameData });
       this.emitMessages.push({ key: "leaderBoard", data: gameData });
-      this.counter = 10;
+      this.counter = 30;
       this.timer = this.time.addEvent({
         delay: 1000,
         callback: () => {

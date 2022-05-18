@@ -190,14 +190,8 @@ nextApp.prepare().then(() => {
     p2eGameContract.on("GameFinished", async (gameId: any) => {
       gameState = "Finished";
       try {
-        let winner;
         const levelData = gameRooms.get("lava");
         if (levelData) {
-          // get latest game and check for winner
-          const lastSlot = Array.from(levelData).pop();
-          if (lastSlot && lastSlot[1].winner) {
-            winner = lastSlot[1].winner;
-          }
           // clear all level data
           levelData.clear();
           const gameId = uuidv4();
@@ -211,7 +205,8 @@ nextApp.prepare().then(() => {
         }
         const leaderBoardData = await getWinners();
         const top5 = leaderBoardData ? leaderBoardData.slice(0, 5) : [];
-        io.emit("gameEnd", { leaderBoard: top5, winner });
+        console.log("emitting: ", { leaderBoard: top5 });
+        io.emit("gameEnd", { leaderBoard: top5 });
       } catch (err) {
         console.log(err);
         io.emit("gameEnd", { leaderBoard: [] });
@@ -348,9 +343,21 @@ nextApp.prepare().then(() => {
             console.log("No wallet found");
             return;
           }
+          gameData.winner = {
+            playerId: winner,
+            walletAddress: wallet,
+          };
+          gameData.gameState = data.state;
+          levelData.set(data.gameId, gameData);
+          gameRooms.set(data.level, levelData);
+          io.emit(`lava_${data.gameId}`, gameData);
 
-          const tx = await p2eGameContract.playerWon(wallet);
-          await tx.wait();
+          try {
+            const tx = await p2eGameContract.playerWon(wallet);
+            await tx.wait();
+          } catch (err) {
+            console.log(err);
+          }
           return;
         }
         gameData.gameState = data.state;
