@@ -273,7 +273,7 @@ nextApp.prepare().then(() => {
     gameState = GameSessionStateEnum[res];
     console.log({ gameState });
     if (gameState === "New") {
-      io.emit("newGame");
+      socket.emit("newGame");
     }
 
     /*
@@ -366,6 +366,31 @@ nextApp.prepare().then(() => {
       }
     );
 
+    socket.on("dead", () => {
+      console.log("a player died", socket.id);
+      const game = assignedPlayers.get(socket.id);
+      if (!game) {
+        return;
+      }
+      assignedPlayers.delete(socket.id);
+      const split = game.room.split("_");
+      const [levelName, gameId] = split;
+      const level = gameRooms.get(levelName);
+      if (!level) {
+        return;
+      }
+      const gameData = level.get(gameId);
+      if (!gameData) {
+        return;
+      }
+      console.log("gameData.players: ", gameData.players.length);
+      if (gameData.players.length > 1) {
+        console.log("emitting dead message");
+        io.emit("dead", { id: socket.id });
+        // todo update gameData to remove player and update Map
+      }
+    });
+
     socket.on("disconnect", () => {
       console.log("client disconnected", socket.id);
       const game = assignedPlayers.get(socket.id);
@@ -383,8 +408,10 @@ nextApp.prepare().then(() => {
       if (!gameData) {
         return;
       }
+      console.log("gameData.players: ", gameData.players.length);
       if (gameData.players.length > 1) {
-        socket.broadcast.emit("dead", { id: socket.id });
+        console.log("emitting dead message");
+        io.emit("dead", { id: socket.id });
         // todo update gameData to remove player and update Map
       } else {
         resetGame(levelName, gameId);

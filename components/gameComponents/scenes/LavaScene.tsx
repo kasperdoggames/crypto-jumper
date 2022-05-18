@@ -180,11 +180,14 @@ export default class LavaScene extends Phaser.Scene {
     });
 
     this.socket.on("dead", (data: any) => {
+      console.log("a player died");
+      console.log("otherPlayers before: ", this.otherPlayers.size);
       const player = this.otherPlayers.get(data.id);
       if (player) {
         this.otherPlayers.delete(data.id);
         player.destroy();
       }
+      console.log("otherPlayers after: ", this.otherPlayers.size);
     });
   }
 
@@ -419,6 +422,31 @@ export default class LavaScene extends Phaser.Scene {
       if (this.music.isPaused) {
         this.music.resume();
       }
+    });
+
+    events.on("dead", () => {
+      console.log("player died");
+      this.socket.emit("dead");
+      // get players and sort based on highest point
+      this.otherPlayers.delete(this.socket.id);
+      const ordered = Array.from(this.otherPlayers.values()).sort(
+        (a, b) => a.y - b.y
+      );
+      console.log({ ordered });
+
+      if (ordered.length === 0 && this.gameState === "runnning") {
+        // emit end game as all players dead
+        console.log("end game request");
+        this.counter = 10;
+        this.socket.emit("gameUpdate", {
+          level: this.level,
+          gameId: this.gameId,
+          state: "end",
+        });
+        return;
+      }
+      // follow highest player
+      this.cameras.main.startFollow(ordered[0]);
     });
   }
 

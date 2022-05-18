@@ -81,6 +81,7 @@ export default class Dialog extends Scene {
             this.bg.setAlpha(0);
             events.emit("playerAdded");
           } catch (err) {
+            button.destroy();
             console.log(err);
             this.bg.setAlpha(0);
           }

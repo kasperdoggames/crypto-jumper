@@ -140,7 +140,7 @@ export class PlayerController {
       });
       this.sprite.anims.play("melt").on("animationcomplete", () => {
         events.emit("playerMessage", "You Died");
-        this.scene.counter = 10;
+        events.emit("dead");
       });
     },
     execute: () => {},
