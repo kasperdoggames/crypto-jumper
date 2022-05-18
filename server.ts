@@ -137,7 +137,7 @@ nextApp.prepare().then(() => {
       const filterPlayerWon = p2eGameContract.filters.PlayerWon(null);
       const items = await p2eGameContract.queryFilter(
         filterPlayerWon,
-        26276877
+        26355256
       );
 
       const filtered = items.map((item: any) => {
@@ -161,8 +161,8 @@ nextApp.prepare().then(() => {
   if (p2eGameContract) {
     // start listener to contract..
 
-    p2eGameContract.on("GameSettled", (gameId: any) => {
-      console.log("NewGame recieved");
+    p2eGameContract.on("NewGame", (gameId: any) => {
+      console.log("NewGame received");
       gameState = "New";
       console.log("emitting newgame");
       io.emit("newGame", { gameId });
