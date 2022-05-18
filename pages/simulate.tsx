@@ -47,24 +47,29 @@ export default function Home() {
     }
 
     p2eGameContract.on("PlayerWon", (address: string) => {
+      console.log("PlayerWon", address);
       handlePlayerWonEvent(address, Date.now());
     });
 
-    p2eGameContract.on("NewGame", () => {
+    p2eGameContract.on("NewGame", (gameId) => {
+      console.log("PlayerWon", gameId);
       fetchGameSessionState();
     });
 
-    p2eGameContract.on("GameStarted", () => {
-      fetchGameSessionState();
-      fetchPlayerTokenBalance();
-    });
-
-    p2eGameContract.on("GameFinished", () => {
+    p2eGameContract.on("GameStarted", (gameId) => {
+      console.log("GameStarted", gameId);
       fetchGameSessionState();
       fetchPlayerTokenBalance();
     });
 
-    p2eGameContract.on("GameSettled", () => {
+    p2eGameContract.on("GameFinished", (gameId) => {
+      console.log("GameFinished", gameId);
+      fetchGameSessionState();
+      fetchPlayerTokenBalance();
+    });
+
+    p2eGameContract.on("GameSettled", (gameId) => {
+      console.log("GameSettled", gameId);
       fetchGameSessionState();
     });
 
@@ -77,6 +82,11 @@ export default function Home() {
 
     return () => {
       p2eGameContract.removeAllListeners("PlayerWon");
+      p2eGameContract.removeAllListeners("NewGame");
+      p2eGameContract.removeAllListeners("GameStarted");
+      p2eGameContract.removeAllListeners("GameFinished");
+      p2eGameContract.removeAllListeners("GameSettled");
+      p2eGameContract.removeAllListeners("PlayerJoinedGame");
     };
   }, []);
 
@@ -200,10 +210,10 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className="flex justify-center items-center flex-col h-screen space-y-5">
+      <main className="flex flex-col items-center justify-center h-screen space-y-5">
         <ConnectButton />
         {/* {account && ( */}
-        <div className="flex justify-center items-center flex-col space-y-5">
+        <div className="flex flex-col items-center justify-center space-y-5">
           <div>STATES: BEGIN : NEW : STARTED : FINISHED : NEW etc.</div>
           <div className="flex space-x-1">
             <div>Token Balance:</div>
