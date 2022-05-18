@@ -155,7 +155,6 @@ export default class LavaScene extends Phaser.Scene {
         callbackScope: this,
         loop: true,
       });
-      //todo: add leaderboard display and show who won this game
     });
 
     this.socket.on("dead", (data: any) => {

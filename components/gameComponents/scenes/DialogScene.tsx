@@ -59,7 +59,8 @@ export default class Dialog extends Scene {
       );
     });
 
-    events.on("leaderBoard", () => {
+    events.on("leaderBoard", (gameData: any) => {
+      console.log("leaderBoard: ", { gameData });
       const { width, height } = this.sys.game.canvas;
       const bg = this.add
         .rectangle(0, 0, width, height, 0x000000, 0.8)

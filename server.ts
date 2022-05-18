@@ -20,6 +20,7 @@ type Player = {
 interface GameLevelData {
   players: Player[];
   gameState: "waiting" | "running" | "end";
+  winner?: Player;
 }
 
 interface PlayerUpdateData {
@@ -143,8 +144,6 @@ nextApp.prepare().then(() => {
         return { playerAddress: item.args[0] };
       });
 
-      console.log(filtered);
-
       const aggregated = filtered.reduce((acc: any, current: any) => {
         const address = current.playerAddress;
         acc[address] = (acc[address] || 0) + 1;
@@ -191,9 +190,15 @@ nextApp.prepare().then(() => {
     p2eGameContract.on("GameFinished", async (gameId: any) => {
       gameState = "Finished";
       try {
+        let winner;
         const levelData = gameRooms.get("lava");
         if (levelData) {
-          // todo: get recent winner and add to response
+          // get latest game and check for winner
+          const lastSlot = Array.from(levelData).pop();
+          if (lastSlot && lastSlot[1].winner) {
+            winner = lastSlot[1].winner;
+          }
+          // clear all level data
           levelData.clear();
           const gameId = uuidv4();
           const gameData: GameLevelData = {
@@ -202,13 +207,14 @@ nextApp.prepare().then(() => {
           };
           levelData.set(gameId, gameData);
           gameRooms.set("lava", levelData);
+          assignedPlayers.clear();
         }
         const leaderBoardData = await getWinners();
-        console.log({ leaderBoardData });
-        io.emit("gameEnd", { leaderBoardData });
+        const top5 = leaderBoardData ? leaderBoardData.slice(0, 5) : [];
+        io.emit("gameEnd", { leaderBoard: top5, winner });
       } catch (err) {
         console.log(err);
-        io.emit("gameEnd", {});
+        io.emit("gameEnd", { leaderBoard: [] });
       }
     });
 
@@ -332,6 +338,7 @@ nextApp.prepare().then(() => {
           return;
         }
         if (data.state === "end") {
+          const winner = socket.id;
           const playerData = assignedPlayers.get(socket.id);
           if (!playerData) {
             return;
