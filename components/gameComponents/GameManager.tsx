@@ -59,7 +59,7 @@ const GameManager = () => {
     game.scene.add("lavaScene", LavaScene);
     game.scene.add("ui", UI);
     game.scene.add("dialog", Dialog);
-    game.scene.start("main");
+    game.scene.start("lavaScene");
   };
 
   return null;

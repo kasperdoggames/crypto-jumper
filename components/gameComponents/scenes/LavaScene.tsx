@@ -60,6 +60,7 @@ export default class LavaScene extends Phaser.Scene {
     this.socket.on("newGame", () => {
       if (this.gameState === "waiting") {
         console.log("newGame received");
+        events.emit("gameState", "newGame");
         this.emitMessages.push({ key: "newGame", data: "" });
       }
     });
@@ -162,6 +163,7 @@ export default class LavaScene extends Phaser.Scene {
       if (this.gameState !== "end") {
         return;
       }
+      events.emit("gameState", "gameEnd");
       console.log("game end");
       this.emitMessages.push({ key: "leaderBoard", data: gameData });
       this.counter = 30;

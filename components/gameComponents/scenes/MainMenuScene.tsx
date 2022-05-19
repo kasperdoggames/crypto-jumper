@@ -1,5 +1,8 @@
 import "phaser";
 import { createButton } from "../elements/ui/CustomButton";
+import { ethers } from "ethers";
+import { getGameTokenContract } from "../../../support/eth";
+import { P2EGAME_CONTRACT_ADDRESS } from "../../../support/contract_addresses";
 
 export default class MainMenu extends Phaser.Scene {
   preload() {
@@ -10,13 +13,43 @@ export default class MainMenu extends Phaser.Scene {
     this.load.image("button3", "assets/ui/blue_button03.png");
   }
 
-  create() {
+  async create() {
+    const fetchPlayerTokenAllowance = async () => {
+      const { ethereum } = window;
+      if (!ethereum) {
+        console.log("no eth in window");
+        return;
+      }
+      const gameTokenContract = getGameTokenContract(ethereum);
+      const accounts = await ethereum?.request({ method: "eth_accounts" });
+      if (accounts.length === 0) {
+        console.log("no accounts found");
+        return;
+      }
+      const address = accounts[0];
+      if (gameTokenContract && address) {
+        const allowance = await gameTokenContract.allowance(
+          address,
+          P2EGAME_CONTRACT_ADDRESS
+        );
+        let res = Number(ethers.utils.formatUnits(allowance, 18));
+        res = Math.round(res * 1e4) / 1e4;
+        console.log("gameAllowance: ", res);
+        return res;
+      }
+    };
+
     this.add.image(0, 0, "volcano_bg").setOrigin(0);
     this.add.image(
       this.game.renderer.width / 2 - 10,
       this.game.renderer.height * 0.35,
       "logo"
     );
+
+    const allowance = await fetchPlayerTokenAllowance();
+    if (allowance && allowance > 0) {
+      this.scene.start("lavaScene");
+    }
 
     createButton(
       this,
