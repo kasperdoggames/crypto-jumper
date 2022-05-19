@@ -60,7 +60,7 @@ export default class LavaScene extends Phaser.Scene {
     this.socket.on("newGame", () => {
       if (this.gameState === "waiting") {
         console.log("newGame received");
-        events.emit("gameState", "newGame");
+        this.emitMessages.push({ key: "gameState", data: "newGame" });
         this.emitMessages.push({ key: "newGame", data: "" });
       }
     });
