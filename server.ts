@@ -347,6 +347,7 @@ nextApp.prepare().then(() => {
           const winner = socket.id;
           const playerData = assignedPlayers.get(socket.id);
           if (!playerData) {
+            console.log("no player data found");
             return;
           }
           const wallet = playerData.walletAddress;
@@ -383,7 +384,6 @@ nextApp.prepare().then(() => {
       if (!game) {
         return;
       }
-      assignedPlayers.delete(socket.id);
       const split = game.room.split("_");
       const [levelName, gameId] = split;
       const level = gameRooms.get(levelName);
@@ -398,7 +398,6 @@ nextApp.prepare().then(() => {
       if (gameData.players.length > 1) {
         console.log("emitting dead message");
         io.emit("dead", { id: socket.id });
-        // todo update gameData to remove player and update Map
       }
     });
 
@@ -423,7 +422,6 @@ nextApp.prepare().then(() => {
       if (gameData.players.length > 1) {
         console.log("emitting dead message");
         io.emit("dead", { id: socket.id });
-        // todo update gameData to remove player and update Map
       } else {
         resetGame(levelName, gameId);
       }
