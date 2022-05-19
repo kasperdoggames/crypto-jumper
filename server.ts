@@ -7,7 +7,6 @@ import { P2EGAME_CONTRACT_ADDRESS } from "./support/contract_addresses";
 import P2EGameJson from "./support/P2EGame.json";
 import { BytesLike, ethers } from "ethers";
 import forceSsl from "./support/forceSsl";
-import { INSPECT_MAX_BYTES } from "buffer";
 
 const dev = process.env.NODE_ENV !== "production";
 const nextApp = next({ dev });
