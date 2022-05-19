@@ -97,14 +97,21 @@ export default class UI extends Scene {
       if (state === "newGame") {
         this.countdownText.setAlpha(0);
       } else {
+        this.countdownText.setText("Waiting for a new game to start...");
         this.countdownText.setAlpha(1);
       }
+    });
+
+    events.on("playerAdded", () => {
+      this.countdownText.setText("Waiting for other players...");
+      this.countdownText.setAlpha(1);
     });
 
     events.on("countdown", (counter: number) => {
       if (counter < 0) {
         this.countdownText.setAlpha(0);
       } else {
+        this.countdownText.setAlpha(1);
         this.countdownText.setText(`Starting in ... ${counter}`);
       }
     });

@@ -343,6 +343,7 @@ nextApp.prepare().then(() => {
           return;
         }
         if (data.state === "end") {
+          console.log("a player has won - game state == end");
           const winner = socket.id;
           const playerData = assignedPlayers.get(socket.id);
           if (!playerData) {
