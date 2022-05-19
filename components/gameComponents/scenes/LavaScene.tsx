@@ -216,6 +216,9 @@ export default class LavaScene extends Phaser.Scene {
 
   init() {
     this.level = "lava";
+    // Load UI
+    this.scene.launch("ui");
+    this.scene.launch("dialog");
     // load up socketIO
     this.loadFromSocket();
     // init the keyboard inputs
@@ -252,9 +255,6 @@ export default class LavaScene extends Phaser.Scene {
   }
 
   create() {
-    // Load UI
-    this.scene.launch("ui");
-    this.scene.launch("dialog");
     // create coins class
     this.coins = new Coins(this);
     // create the tile map instance
