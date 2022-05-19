@@ -7,6 +7,7 @@ import { P2EGAME_CONTRACT_ADDRESS } from "./support/contract_addresses";
 import P2EGameJson from "./support/P2EGame.json";
 import { BytesLike, ethers } from "ethers";
 import forceSsl from "./support/forceSsl";
+import { INSPECT_MAX_BYTES } from "buffer";
 
 const dev = process.env.NODE_ENV !== "production";
 const nextApp = next({ dev });
@@ -205,8 +206,18 @@ nextApp.prepare().then(() => {
         }
         const leaderBoardData = await getWinners();
         const top5 = leaderBoardData ? leaderBoardData.slice(0, 5) : [];
-        console.log("emitting: ", { leaderBoard: top5 });
-        io.emit("gameEnd", { leaderBoard: top5 });
+        const top5AddressSliced = top5.map((item) => ({
+          playerAddress: `${item.playerAddress.slice(
+            0,
+            4
+          )}...${item.playerAddress.slice(
+            item.playerAddress.length - 4,
+            item.playerAddress.length
+          )}`,
+          count: item.count,
+        }));
+        console.log("emitting: ", { leaderBoard: top5AddressSliced });
+        io.emit("gameEnd", { leaderBoard: top5AddressSliced });
       } catch (err) {
         console.log(err);
         io.emit("gameEnd", { leaderBoard: [] });

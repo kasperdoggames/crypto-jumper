@@ -63,18 +63,26 @@ export default class UI extends Scene {
       fontFamily: "Splatch",
     });
 
-    this.countdownText = this.add.text(180, 150, "Waiting for available game", {
-      fontSize: "30px",
-      color: "#fff",
-      fontFamily: "Splatch",
-    });
+    const screenCenterX =
+      this.cameras.main.worldView.x + this.cameras.main.width / 2;
+    const screenCenterY =
+      this.cameras.main.worldView.y + this.cameras.main.height / 2;
 
-    this.playerMessage = this.add
-      .text(180, 150, "", {
+    this.countdownText = this.add
+      .text(screenCenterX, 330, "Waiting for a new game to start...", {
         fontSize: "30px",
         color: "#fff",
         fontFamily: "Splatch",
       })
+      .setOrigin(0.5);
+
+    this.playerMessage = this.add
+      .text(screenCenterX, 330, "", {
+        fontSize: "30px",
+        color: "#fff",
+        fontFamily: "Splatch",
+      })
+      .setOrigin(0.5)
       .setAlpha(0);
 
     events.on(

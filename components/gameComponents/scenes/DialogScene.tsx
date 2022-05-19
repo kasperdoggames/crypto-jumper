@@ -25,13 +25,18 @@ export default class Dialog extends Scene {
   create() {
     const { width, height } = this.sys.game.canvas;
 
+    const screenCenterX =
+      this.cameras.main.worldView.x + this.cameras.main.width / 2;
+    const screenCenterY =
+      this.cameras.main.worldView.y + this.cameras.main.height / 2;
+
     this.bg = this.add
       .rectangle(0, 0, width, height, 0x000000, 0.8)
       .setOrigin(0)
       .setAlpha(0);
 
     this.title = this.add
-      .text(this.game.renderer.width / 2, 120, "", {
+      .text(screenCenterX, 120, "", {
         fontFamily: "Splatch",
       })
       .setOrigin(0.5)
@@ -39,7 +44,7 @@ export default class Dialog extends Scene {
       .setAlpha(0);
 
     this.dialogBox = this.add
-      .rectangle(this.game.renderer.width / 2, 300, 800, 400, 0xd0d0d0)
+      .rectangle(screenCenterX, 300, 800, 400, 0xd0d0d0)
       .setDepth(1)
       .setAlpha(0);
 
@@ -96,7 +101,8 @@ export default class Dialog extends Scene {
       this.dialogBox.setAlpha(1);
       this.title.setText("Leaderboard").setAlpha(1);
       const output = leaderBoard.map(
-        (playerData, index) => `${index + 1}: ${playerData.playerAddress}`
+        (playerData, index) =>
+          `${index + 1}: ${playerData.playerAddress} ${playerData.count}`
       );
       this.add
         .text(this.game.renderer.width / 2, 200, output.join("\n"), {
