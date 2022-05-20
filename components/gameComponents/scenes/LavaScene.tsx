@@ -432,7 +432,7 @@ export default class LavaScene extends Phaser.Scene {
       // get players and sort based on highest point
       this.otherPlayers.delete(this.socket.id);
       const ordered = Array.from(this.otherPlayers.values()).sort(
-        (a, b) => a.y - b.y
+        (a, b) => b.y - a.y
       );
       console.log({ ordered });
 
@@ -448,7 +448,11 @@ export default class LavaScene extends Phaser.Scene {
         return;
       }
       // follow highest player
-      this.cameras.main.startFollow(ordered[0]);
+      try {
+        this.cameras.main.startFollow(ordered[0]);
+      } catch (err) {
+        console.log(err);
+      }
     });
   }
 

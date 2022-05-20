@@ -8,6 +8,7 @@ export default class Dialog extends Scene {
   title!: Phaser.GameObjects.Text;
   bg!: Phaser.GameObjects.Rectangle;
   dialogBox!: Phaser.GameObjects.Rectangle;
+  addToGameBtn!: Phaser.GameObjects.Container;
 
   constructor() {
     super({
@@ -48,6 +49,34 @@ export default class Dialog extends Scene {
       .setDepth(1)
       .setAlpha(0);
 
+    this.addToGameBtn = createButton(
+      this,
+      null,
+      null,
+      {
+        defaultImageName: "button2",
+        hoverImageName: "button3",
+        clickImageName: "button1",
+        label: "Add To Game",
+      },
+      async () => {
+        try {
+          this.addToGameBtn.setAlpha(0);
+          this.addToGameBtn.disableInteractive();
+          this.title.setText("Checking...").setAlpha(1);
+          await addPlayer();
+          this.title.setAlpha(0);
+          this.bg.setAlpha(0);
+          events.emit("playerAdded");
+        } catch (err) {
+          console.log(err);
+          this.addToGameBtn.disableInteractive();
+          this.bg.setAlpha(0);
+          this.addToGameBtn.setAlpha(0);
+        }
+      }
+    );
+
     const addPlayer = async () => {
       const { ethereum } = window;
       const p2eGameContract = getP2EGameContract(ethereum);
@@ -67,31 +96,8 @@ export default class Dialog extends Scene {
 
     events.on("newGame", () => {
       this.bg.setAlpha(1);
-      const button = createButton(
-        this,
-        null,
-        null,
-        {
-          defaultImageName: "button2",
-          hoverImageName: "button3",
-          clickImageName: "button1",
-          label: "Add To Game",
-        },
-        async () => {
-          try {
-            button.destroy();
-            this.title.setText("Checking...").setAlpha(1);
-            await addPlayer();
-            this.title.setAlpha(0);
-            this.bg.setAlpha(0);
-            events.emit("playerAdded");
-          } catch (err) {
-            button.destroy();
-            console.log(err);
-            this.bg.setAlpha(0);
-          }
-        }
-      );
+      this.addToGameBtn.setInteractive();
+      this.addToGameBtn.setAlpha(1);
     });
 
     events.on("leaderBoard", (gameData: { leaderBoard: any[] }) => {
