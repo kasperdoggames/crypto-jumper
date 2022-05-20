@@ -12,8 +12,8 @@ const Home: NextPage = () => {
           </Head>
           <Navbar currentPageHref={"/"} />
           <div className="flex flex-col items-center h-screen bg-gray-700">
-            <div>
-              <img src="/assets/logo.png"></img>
+            <div className="">
+              <img className="w-96" src="/assets/logo.png"></img>
             </div>
           </div>
         </div>
