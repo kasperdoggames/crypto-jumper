@@ -15,7 +15,6 @@ import Navbar from "../../components/Navbar";
 import LoadingScreen from "../../components/Loading";
 import { P2EGAME_CONTRACT_ADDRESS } from "../../support/contract_addresses";
 import { Dialog, Transition } from "@headlessui/react";
-import { CheckIcon } from "@heroicons/react/outline";
 
 const Home: NextPage = () => {
   const [cryptAccount, setCryptAccount] =
