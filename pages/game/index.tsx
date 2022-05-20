@@ -282,7 +282,7 @@ const Home: NextPage = () => {
                   <div className="flex flex-col items-center justify-center py-8">
                     <div className="w-2/3 space-y-8 text-center">
                       <div className="text-2xl text-white font-splatch">
-                        You're going to need an NFT!
+                        You&apos;re going to need an NFT!
                       </div>
                       <div className="text-center text-white font-splatch">
                         Create your own unique Coollink NFT to own, cherish and
@@ -311,8 +311,8 @@ const Home: NextPage = () => {
                           Stake your $COOL
                         </div>
                         <div className="text-center text-white font-splatch">
-                          You'll need to stake some of your $COOL tokens to play
-                          the game.
+                          You&apos;ll need to stake some of your $COOL tokens to
+                          play the game.
                         </div>
                         <button
                           className="flex flex-col items-center px-12 pt-4 pb-6 bg-yellow-600 border-4 border-white drop-shadow-2xl hover:bg-yellow-500 rounded-xl shadow-white"
