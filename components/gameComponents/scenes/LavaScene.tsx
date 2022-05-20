@@ -434,7 +434,6 @@ export default class LavaScene extends Phaser.Scene {
       const ordered = Array.from(this.otherPlayers.values()).sort(
         (a, b) => b.y - a.y
       );
-      console.log({ ordered });
 
       if (ordered.length === 0 && this.gameState === "runnning") {
         // emit end game as all players dead

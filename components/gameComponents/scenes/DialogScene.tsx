@@ -7,8 +7,9 @@ import { sharedInstance as events } from "../EventCenter";
 export default class Dialog extends Scene {
   title!: Phaser.GameObjects.Text;
   bg!: Phaser.GameObjects.Rectangle;
-  dialogBox!: Phaser.GameObjects.Rectangle;
+  dialogBox!: Phaser.GameObjects.Graphics;
   addToGameBtn!: Phaser.GameObjects.Container;
+  dialogText!: Phaser.GameObjects.Text;
 
   constructor() {
     super({
@@ -26,10 +27,8 @@ export default class Dialog extends Scene {
   create() {
     const { width, height } = this.sys.game.canvas;
 
-    const screenCenterX =
-      this.cameras.main.worldView.x + this.cameras.main.width / 2;
-    const screenCenterY =
-      this.cameras.main.worldView.y + this.cameras.main.height / 2;
+    const screenCenterX = this.game.renderer.width / 2;
+    const screenCenterY = this.game.renderer.height / 2;
 
     this.bg = this.add
       .rectangle(0, 0, width, height, 0x000000, 0.8)
@@ -44,15 +43,23 @@ export default class Dialog extends Scene {
       .setDepth(1.1)
       .setAlpha(0);
 
-    this.dialogBox = this.add
-      .rectangle(screenCenterX, 300, 800, 400, 0xd0d0d0)
-      .setDepth(1)
+    this.dialogText = this.add
+      .text(screenCenterX, 240, "", {
+        fontFamily: "Splatch",
+      })
+      .setOrigin(0.5)
+      .setDepth(1.1)
       .setAlpha(0);
+
+    this.dialogBox = this.add
+      .graphics()
+      .fillStyle(0xd0d0d0, 1)
+      .fillRoundedRect((this.game.renderer.width - 800) / 2, 150, 800, 400, 32);
 
     this.addToGameBtn = createButton(
       this,
       null,
-      null,
+      450,
       {
         defaultImageName: "button2",
         hoverImageName: "button3",
@@ -63,6 +70,8 @@ export default class Dialog extends Scene {
         try {
           this.addToGameBtn.setAlpha(0);
           this.addToGameBtn.disableInteractive();
+          this.dialogBox.setAlpha(0);
+          this.dialogText.setText("").setAlpha(0);
           this.title.setText("Checking...").setAlpha(1);
           await addPlayer();
           this.title.setAlpha(0);
@@ -72,7 +81,9 @@ export default class Dialog extends Scene {
           console.log(err);
           this.addToGameBtn.disableInteractive();
           this.bg.setAlpha(0);
+          this.dialogBox.setAlpha(0);
           this.addToGameBtn.setAlpha(0);
+          this.dialogText.setText("").setAlpha(0);
         }
       }
     );
@@ -98,6 +109,9 @@ export default class Dialog extends Scene {
       this.bg.setAlpha(1);
       this.addToGameBtn.setInteractive();
       this.addToGameBtn.setAlpha(1);
+      this.dialogText
+        .setText("Add yourself to the next available game")
+        .setAlpha(1);
     });
 
     events.on("leaderBoard", (gameData: { leaderBoard: any[] }) => {
@@ -111,7 +125,7 @@ export default class Dialog extends Scene {
           `${index + 1}: ${playerData.playerAddress} ${playerData.count}`
       );
       this.add
-        .text(this.game.renderer.width / 2, 200, output.join("\n"), {
+        .text(screenCenterX, 200, output.join("\n"), {
           fontFamily: "Splatch",
         })
         .setOrigin(0.5)
