@@ -5,11 +5,13 @@ import LavaScene from "./LavaScene";
 import { sharedInstance as events } from "../EventCenter";
 
 export default class Dialog extends Scene {
-  title!: Phaser.GameObjects.Text;
-  bg!: Phaser.GameObjects.Rectangle;
-  dialogBox!: Phaser.GameObjects.Graphics;
-  addToGameBtn!: Phaser.GameObjects.Container;
+  dialogBackground!: Phaser.GameObjects.Graphics;
+  dialogTitle!: Phaser.GameObjects.Text;
   dialogText!: Phaser.GameObjects.Text;
+  leaderboardBackground!: Phaser.GameObjects.Graphics;
+  leaderboardTitle!: Phaser.GameObjects.Text;
+  leaderboardList!: Phaser.GameObjects.Text;
+  addToGameBtn!: Phaser.GameObjects.Container;
 
   constructor() {
     super({
@@ -26,67 +28,96 @@ export default class Dialog extends Scene {
 
   create() {
     const { width, height } = this.sys.game.canvas;
-
     const screenCenterX = this.game.renderer.width / 2;
     const screenCenterY = this.game.renderer.height / 2;
 
-    this.bg = this.add
-      .rectangle(0, 0, width, height, 0x000000, 0.8)
-      .setOrigin(0)
-      .setAlpha(0);
-
-    this.title = this.add
-      .text(screenCenterX, 120, "", {
+    this.dialogTitle = this.add
+      .text(screenCenterX, 330, "", {
         fontFamily: "Splatch",
       })
+      .setFontSize(20)
       .setOrigin(0.5)
       .setDepth(1.1)
       .setAlpha(0);
 
     this.dialogText = this.add
-      .text(screenCenterX, 240, "", {
+      .text(screenCenterX, 300, "", {
         fontFamily: "Splatch",
+        color: "#ffffff",
       })
+      .setFontSize(20)
       .setOrigin(0.5)
       .setDepth(1.1)
       .setAlpha(0);
 
-    this.dialogBox = this.add
+    this.leaderboardTitle = this.add
+      .text(screenCenterX, 270, "", {
+        fontFamily: "Splatch",
+      })
+      .setFontSize(20)
+      .setOrigin(0.5)
+      .setDepth(1.1)
+      .setAlpha(0);
+
+    this.leaderboardList = this.add
+      .text(screenCenterX, 360, "", {
+        fontFamily: "Splatch",
+      })
+      .setFontSize(18)
+      .setOrigin(0.5)
+      .setDepth(1.1)
+      .setAlpha(0);
+
+    this.leaderboardBackground = this.add
       .graphics()
-      .fillStyle(0xd0d0d0, 1)
-      .fillRoundedRect((this.game.renderer.width - 800) / 2, 150, 800, 400, 32);
+      .fillStyle(0xffffff, 1)
+      .fillRoundedRect((this.game.renderer.width - 500) / 2, 220, 500, 300, 32)
+      .fillStyle(0xf7bc27, 1)
+      .fillRoundedRect((this.game.renderer.width - 480) / 2, 230, 480, 280, 32)
+      .setAlpha(0);
+
+    this.dialogBackground = this.add
+      .graphics()
+      .fillStyle(0xffffff, 1)
+      .fillRoundedRect((this.game.renderer.width - 500) / 2, 220, 500, 230, 32)
+      .fillStyle(0xf7bc27, 1)
+      .fillRoundedRect((this.game.renderer.width - 480) / 2, 230, 480, 210, 32)
+      .setAlpha(0);
+
+    const handleButtonClick = async () => {
+      try {
+        this.addToGameBtn.setAlpha(0);
+        this.addToGameBtn.disableInteractive();
+        this.dialogBackground.setAlpha(1);
+        this.dialogText.setText("").setAlpha(0);
+        this.dialogTitle.setText("Checking...").setAlpha(1);
+        await addPlayer();
+        this.dialogText.setAlpha(0);
+        this.dialogTitle.setAlpha(0);
+        this.dialogBackground.setAlpha(0);
+        events.emit("playerAdded");
+      } catch (err) {
+        console.log(err);
+        this.addToGameBtn.disableInteractive();
+        this.dialogBackground.setAlpha(0);
+        this.addToGameBtn.setAlpha(0);
+        this.dialogText.setText("").setAlpha(0);
+        this.dialogTitle.setAlpha(0);
+      }
+    };
 
     this.addToGameBtn = createButton(
       this,
       null,
-      450,
+      380,
       {
         defaultImageName: "button2",
         hoverImageName: "button3",
         clickImageName: "button1",
         label: "Add To Game",
       },
-      async () => {
-        try {
-          this.addToGameBtn.setAlpha(0);
-          this.addToGameBtn.disableInteractive();
-          this.dialogBox.setAlpha(0);
-          this.dialogText.setText("").setAlpha(0);
-          this.title.setText("Checking...").setAlpha(1);
-          await addPlayer();
-          this.title.setAlpha(0);
-          this.bg.setAlpha(0);
-          events.emit("playerAdded");
-        } catch (err) {
-          console.log(err);
-          this.addToGameBtn.disableInteractive();
-          this.bg.setAlpha(0);
-          this.dialogBox.setAlpha(0);
-          this.addToGameBtn.setAlpha(0);
-          this.dialogText.setText("").setAlpha(0);
-        }
-      }
-    );
+      handleButtonClick
+    ).setAlpha(0);
 
     const addPlayer = async () => {
       const { ethereum } = window;
@@ -106,38 +137,40 @@ export default class Dialog extends Scene {
     };
 
     events.on("newGame", () => {
-      this.bg.setAlpha(1);
+      this.leaderboardBackground.setAlpha(0);
+      this.leaderboardTitle.setAlpha(0);
+      this.leaderboardTitle.setAlpha(0);
+      this.dialogBackground.setAlpha(1);
       this.addToGameBtn.setInteractive();
       this.addToGameBtn.setAlpha(1);
       this.dialogText
-        .setText("Add yourself to the next available game")
+        .setText("Add yourself to the next\navailable game")
+        .setAlign("center")
         .setAlpha(1);
     });
 
     events.on("leaderBoard", (gameData: { leaderBoard: any[] }) => {
       console.log("leaderBoard: ", { gameData });
       const { leaderBoard } = gameData;
-      this.bg.setAlpha(1);
-      this.dialogBox.setAlpha(1);
-      this.title.setText("Leaderboard").setAlpha(1);
+      this.addToGameBtn.setAlpha(0);
+      this.dialogTitle.setAlpha(0);
+      this.dialogText.setAlpha(0);
+      this.dialogBackground.setAlpha(0);
+      this.leaderboardBackground.setAlpha(1);
+      this.leaderboardTitle.setText("Leaderboard").setAlpha(1);
       const output = leaderBoard.map(
         (playerData, index) =>
           `${index + 1}: ${playerData.playerAddress} ${playerData.count}`
       );
-      this.add
-        .text(screenCenterX, 200, output.join("\n"), {
-          fontFamily: "Splatch",
-        })
-        .setOrigin(0.5)
-        .setDepth(1.1);
+      this.leaderboardList.setText(output.join("\n")).setAlpha(1);
     });
 
     events.on("awaitingResults", (isWinner: boolean) => {
-      this.bg.setAlpha(1);
       const text = isWinner
         ? "You Won!\nAwaiting Results.."
         : "You Lost\nAwaiting Results..";
-      this.title.setText(text).setAlpha(1);
+      this.dialogBackground.setAlpha(1);
+      this.dialogTitle.setText(text).setAlign("center").setAlpha(1);
     });
   }
 }

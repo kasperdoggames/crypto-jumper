@@ -43,7 +43,7 @@ const Home: NextPage = () => {
   const DynamicLoader = dynamic(
     () => import("../../components/gameComponents/GameManager"),
     {
-      loading: () => <p>Loading...</p>,
+      loading: () => <p></p>,
       ssr: false,
     }
   );
@@ -277,7 +277,7 @@ const Home: NextPage = () => {
             <LoadingScreen isLoading={isLoading} />
             {cryptAccount && !activeChain?.unsupported ? (
               <div>
-                {!hasNFT ? (
+                {hasNFT && !hasNFT ? (
                   <div className="flex flex-col items-center justify-center py-8">
                     <div className="w-2/3 space-y-8 text-center">
                       <div className="text-2xl text-white font-splatch">

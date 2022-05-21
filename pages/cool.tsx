@@ -20,7 +20,7 @@ const Cool: NextPage = () => {
               grows more utility will be added.
             </p>
             <p className="text-4xl text-white font-koalafamily">
-              Yield Every Genesis Coollink yields 10 $COOL a day. Use it to play
+              Every Genesis Coollink NFT yields 1 $COOL per hour. Use it to play
               and win more $COOL.
             </p>
             <p className="text-4xl text-white font-koalafamily">

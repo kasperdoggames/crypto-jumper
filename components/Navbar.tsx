@@ -6,7 +6,6 @@ import { useAccount } from "wagmi";
 import { getGameNFTTokenContract, toIpfsGatewayURL } from "../support/eth";
 
 const navigation = [
-  { name: "About", href: "about", current: true },
   { name: "Play ", href: "game", current: false },
   { name: "$COOL ", href: "cool", current: false },
 ];
