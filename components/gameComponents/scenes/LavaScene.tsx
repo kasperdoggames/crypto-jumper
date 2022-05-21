@@ -17,7 +17,7 @@ type Player = {
   account?: string | undefined;
 };
 
-type gameState = "waiting" | "runnning" | "end";
+type gameState = "waiting" | "running" | "end";
 
 interface GameLevelData {
   gameId: string;
@@ -94,7 +94,7 @@ export default class LavaScene extends Phaser.Scene {
         const player = this.add.sprite(0, 0, "coolLink", "idle_01.png");
         player.setAlpha(0.5);
         this.otherPlayers.set(otherPlayer.playerId, player);
-        this.gameState = "runnning";
+        this.gameState = "running";
         this.loading = false;
       });
 
@@ -102,7 +102,7 @@ export default class LavaScene extends Phaser.Scene {
 
       // listen on game data updates
       this.socket.on(`lava_${gameData.gameId}`, (data: GameLevelData) => {
-        if (data.gameState === "end" && this.gameState === "runnning") {
+        if (data.gameState === "end" && this.gameState === "running") {
           let isWinner = false;
           console.log("awaiting results...");
           if (data.winner && data.winner.playerId === this.socket.id) {
@@ -435,7 +435,7 @@ export default class LavaScene extends Phaser.Scene {
         (a, b) => b.y - a.y
       );
 
-      if (ordered.length === 0 && this.gameState === "runnning") {
+      if (ordered.length === 0 && this.gameState === "running") {
         // emit end game as all players dead
         console.log("end game request");
         this.counter = 10;
