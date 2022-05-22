@@ -4,14 +4,14 @@ import Navbar from "../components/Navbar";
 
 const Home: NextPage = () => {
   return (
-    <div className="bg-gray-900">
+    <div className="bg-gray-800">
       <div className="container h-full mx-auto max-w-7xl">
         <div>
           <Head>
             <title>Crypto Jumper</title>
           </Head>
           <Navbar currentPageHref={"/"} />
-          <div className="flex flex-col items-center bg-gray-700">
+          <div className="flex flex-col items-center bg-gray-900">
             <img src="/assets/splash.png" />
             <p className="pt-12 pb-4 text-4xl text-white font-splatch">
               &lt;How to play&gt;

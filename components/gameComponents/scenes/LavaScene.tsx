@@ -166,6 +166,7 @@ export default class LavaScene extends Phaser.Scene {
       events.emit("gameState", "gameEnd");
       console.log("game end");
       this.emitMessages.push({ key: "leaderBoard", data: gameData });
+      // TODO: Is this page refresh needed?
       this.counter = 30;
       this.timer = this.time.addEvent({
         delay: 1000,

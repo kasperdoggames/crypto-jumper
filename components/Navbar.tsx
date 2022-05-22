@@ -60,7 +60,7 @@ const Navbar = ({ currentPageHref }: { currentPageHref: string }) => {
     }
   });
   return (
-    <Disclosure as="nav" className="bg-gray-800">
+    <Disclosure as="nav" className="bg-gray-900">
       {({ open }) => (
         <>
           <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">

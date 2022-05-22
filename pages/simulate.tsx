@@ -21,23 +21,25 @@ export default function Home() {
   };
 
   const inputRef = useRef<HTMLInputElement>(null);
-  const { data: account } = useAccount();
-  const [cryptAccount, setCryptAccount] =
-    useState<GetAccountResult<BaseProvider>>();
+  const { data } = useAccount();
+  // const [cryptAccount, setCryptAccount] =
+  //   useState<GetAccountResult<BaseProvider>>();
   const [gameSessionState, setGameSessionState] = useState<GameSates | null>(
     null
   );
   const [gameTokenBalance, setGameTokenBalance] = useState<number | null>(null);
+  const [playersAddedToGame, setPlayersAddedToGame] = useState<string[]>([]);
+  const [currentGameId, setCurrentGameId] = useState<number>(0);
 
   const handlePlayerWonEvent = async (address: string, timestamp: number) => {
     console.log("PlayerWonEvent", address, new Date(timestamp).toISOString());
   };
 
-  useEffect(() => {
-    if (account) {
-      setCryptAccount(account);
-    }
-  }, [account]);
+  // useEffect(() => {
+  //   if (account) {
+  //     setCryptAccount(account);
+  //   }
+  // }, [account]);
 
   useEffect(() => {
     const { ethereum } = window;
@@ -52,7 +54,9 @@ export default function Home() {
     });
 
     p2eGameContract.on("NewGame", (gameId) => {
-      console.log("PlayerWon", Number(gameId));
+      console.log("NewGame", Number(gameId));
+      setCurrentGameId(Number(gameId));
+      setPlayersAddedToGame([]);
       fetchGameSessionState();
     });
 
@@ -77,6 +81,7 @@ export default function Home() {
       "PlayerJoinedGame",
       (address: string, clientId: string) => {
         console.log("PlayerJoinedGame", address, clientId);
+        fetchPlayersAddedToGame();
       }
     );
 
@@ -102,18 +107,35 @@ export default function Home() {
   const fetchPlayerTokenBalance = async () => {
     const { ethereum } = window;
     const gameTokenContract = getGameTokenContract(ethereum);
-    if (gameTokenContract && cryptAccount) {
-      const balance = await gameTokenContract.balanceOf(cryptAccount.address);
+    if (gameTokenContract && data) {
+      const balance = await gameTokenContract.balanceOf(data.address);
       let res = Number(ethers.utils.formatUnits(balance, 18));
       res = Math.round(res * 1e4) / 1e4;
       setGameTokenBalance(res);
     }
   };
 
+  const fetchPlayersAddedToGame = async () => {
+    const { ethereum } = window;
+    const p2eGameContract = getP2EGameContract(ethereum);
+    if (p2eGameContract) {
+      const gameId = await p2eGameContract.gameId();
+      console.log({ gameId });
+      setCurrentGameId(Number(gameId));
+      const gameSession = await p2eGameContract.getGameSessions(Number(gameId));
+      console.log(gameSession.players);
+      setPlayersAddedToGame(gameSession.players);
+    }
+  };
+
   useEffect(() => {
+    console.log("fetchGameSessionState");
     fetchGameSessionState();
+    console.log("fetchPlayerTokenBalance");
     fetchPlayerTokenBalance();
-  }, []);
+    console.log("fetchPlayersAddedToGame");
+    fetchPlayersAddedToGame();
+  }, [data]);
 
   const handleCheckUpkeep = async () => {
     const { ethereum } = window;
@@ -216,8 +238,20 @@ export default function Home() {
         <div className="flex flex-col items-center justify-center space-y-5">
           <div>STATES: BEGIN : NEW : STARTED : FINISHED : NEW etc.</div>
           <div className="flex space-x-1">
+            <div>Game ID:</div>
+            <div>{currentGameId}</div>
+          </div>
+          <div className="flex space-x-1">
             <div>Token Balance:</div>
             <div>{gameTokenBalance}</div>
+          </div>
+          <div className="flex space-x-1">
+            <div>Game Players:</div>
+            <ul>
+              {playersAddedToGame.map((player, index) => {
+                return <li key={index}>{player}</li>;
+              })}
+            </ul>
           </div>
           <div className="text-xl font-bold">
             Game Session State: {gameSessionState}
