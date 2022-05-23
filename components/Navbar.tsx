@@ -4,6 +4,7 @@ import { BellIcon, MenuIcon, XIcon } from "@heroicons/react/outline";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useAccount } from "wagmi";
 import { getGameNFTTokenContract, toIpfsGatewayURL } from "../support/eth";
+import { getNFTTokenMetadata } from "../support/nftToken";
 
 const navigation = [
   { name: "Play ", href: "game", current: false },
@@ -18,39 +19,23 @@ function classNames(...classes: string[]) {
 }
 
 const Navbar = ({ currentPageHref }: { currentPageHref: string }) => {
-  const { data } = useAccount();
+  const { data: account } = useAccount();
   const [avatarImageUrl, setAvatarImageUrl] = useState(DEFAULT_AVATAR_IMAGEURL);
 
   useEffect(() => {
     const getNFTTokens = async () => {
-      if (data) {
-        console.log("address", data.address);
+      if (account && account.address) {
         const { ethereum } = window;
-        const gameNFTTokenContract = getGameNFTTokenContract(ethereum);
-        if (gameNFTTokenContract) {
-          const nftTokens = await gameNFTTokenContract.walletOfOwner(
-            data.address
-          );
-          if (nftTokens > 0) {
-            const tokenId = nftTokens[0];
-            const tokenJsonString = await gameNFTTokenContract.tokenURI(
-              tokenId
-            );
-            const nftMetadata = toIpfsGatewayURL(tokenJsonString);
-            console.log("nftMetadata", nftMetadata);
-            const response = await fetch(nftMetadata);
-            const metadata = await response.json();
-            console.log("metadata.image", metadata.image);
-            const imageUrl = toIpfsGatewayURL(metadata.image);
-            setAvatarImageUrl(imageUrl);
-          }
-        }
+        const metadata = await getNFTTokenMetadata(ethereum, account.address);
+        console.log({ metadata });
+        const imageUrl = toIpfsGatewayURL(metadata.image);
+        setAvatarImageUrl(imageUrl);
       } else {
         setAvatarImageUrl(DEFAULT_AVATAR_IMAGEURL);
       }
     };
     getNFTTokens();
-  }, [data]);
+  }, [account]);
 
   navigation.map((nav) => {
     if (nav.href === currentPageHref) {
@@ -117,11 +102,13 @@ const Navbar = ({ currentPageHref }: { currentPageHref: string }) => {
                     <div>
                       <Menu.Button className="flex text-sm bg-gray-800 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white">
                         <span className="sr-only">Open user menu</span>
-                        <img
-                          className="w-8 h-8 rounded-full"
-                          src={avatarImageUrl}
-                          alt=""
-                        />
+                        <div className="flex items-center justify-center bg-white rounded-full w-9 h-9">
+                          <img
+                            className="w-8 h-8 rounded-full"
+                            src={avatarImageUrl}
+                            alt=""
+                          />
+                        </div>
                       </Menu.Button>
                     </div>
                     <Transition
