@@ -25,12 +25,12 @@ const Cool: NextPage = () => {
 
   return (
     <div className="bg-gray-800">
-      <div className="container h-full mx-auto max-w-7xl">
+      <div className="container h-screen mx-auto max-w-7xl">
         <Head>
           <title>Crypto Jumper</title>
         </Head>
         <Navbar currentPageHref="cool" />
-        <div className="flex flex-col items-center h-screen bg-gray-900">
+        <div className="flex flex-col items-center bg-gray-900">
           <h1 className="py-8 text-2xl text-white font-splatch">
             Powered by CoolLink NFTs and $COOL Tokens
           </h1>
@@ -55,7 +55,7 @@ const Cool: NextPage = () => {
               </p>
             )}
           </div>
-          <div className="w-2/3 px-8">
+          <div className="w-2/3 p-8">
             <div className="flex flex-col items-center">
               <h2 className="py-8 text-xl text-indigo-500 font-splatch">
                 $COOL Tokens
@@ -79,9 +79,7 @@ const Cool: NextPage = () => {
             </div>
           </div>
         </div>
-        <div className="">
-          <Footer />
-        </div>
+        <Footer />
       </div>
     </div>
   );
