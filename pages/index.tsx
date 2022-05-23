@@ -30,9 +30,7 @@ const Home: NextPage = () => {
                   </div>
                 </div>
                 <div className="w-2/3 py-4 space-y-8">
-                  <p className="text-2xl font-splatch text-violet-600">
-                    Step 1
-                  </p>
+                  <p className="text-xl font-splatch text-violet-600">Step 1</p>
                   <ul className="leading-10 font-splatch text-violet-600">
                     <li>Mint your unique and personal Coollink NFT.</li>{" "}
                     <li>
@@ -55,9 +53,7 @@ const Home: NextPage = () => {
                   </div>
                 </div>
                 <div className="w-2/3 py-4 space-y-8">
-                  <p className="text-2xl text-yellow-600 font-splatch">
-                    Step 2
-                  </p>
+                  <p className="text-xl text-yellow-600 font-splatch">Step 2</p>
                   <ul className="leading-10 text-yellow-600 font-splatch">
                     <li>Stake $COOL to play the game.</li>{" "}
                     <li>Each game costs 1 $COOL token.</li>
@@ -78,7 +74,7 @@ const Home: NextPage = () => {
                   </div>
                 </div>
                 <div className="w-2/3 py-4 space-y-8">
-                  <p className="text-2xl text-green-600 font-splatch">Step 3</p>
+                  <p className="text-xl text-green-600 font-splatch">Step 3</p>
                   <ul className="leading-10 text-green-600 font-splatch">
                     <li>
                       Play against fellow NFT holders in this multiplayer
@@ -101,7 +97,7 @@ const Home: NextPage = () => {
                   </div>
                 </div>
                 <div className="w-2/3 py-4 space-y-8">
-                  <p className="text-2xl text-cyan-600 font-splatch">Step 4</p>
+                  <p className="text-xl text-cyan-600 font-splatch">Step 4</p>
                   <ul className="text-lg leading-10 text-cyan-600 font-splatch">
                     <li>Winning the round wins you all the staked tokens.</li>{" "}
                     <li>
