@@ -130,7 +130,6 @@ export default class UI extends Scene {
     );
 
     const screenCenterX = this.game.renderer.width / 2;
-    const screenCenterY = this.game.renderer.height / 2;
 
     this.countdownText = this.add
       .text(screenCenterX, 330, "Waiting for a new\ngame to start...", {

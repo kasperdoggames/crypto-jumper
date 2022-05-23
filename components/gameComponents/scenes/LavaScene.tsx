@@ -57,11 +57,26 @@ export default class LavaScene extends Phaser.Scene {
     // set loading is true while obtaining list of other players
     this.loading = true;
 
+    const checkSetTimer = (playerId: string, index: number) => {
+      if (this.socket.id === playerId && index === 0 && !this.timer) {
+        this.timer = this.time.addEvent({
+          delay: 1000,
+          callback: this.updateCounter,
+          callbackScope: this,
+          loop: true,
+        });
+        return true;
+      }
+    };
+
     this.socket.on("newGame", () => {
+      if (this.gameState === "end") {
+        // reload window
+        window.location.reload();
+      }
       if (this.gameState === "waiting") {
         console.log("newGame received");
         this.emitMessages.push({ key: "gameState", data: "newGame" });
-        this.emitMessages.push({ key: "newGame", data: "" });
       }
     });
 
@@ -79,16 +94,8 @@ export default class LavaScene extends Phaser.Scene {
       this.otherPlayers.clear();
       // map through existing players and add to game list
       gameData.players.map((otherPlayer: Player, index: number) => {
-        if (this.socket.id === otherPlayer.playerId) {
-          // if the first to join the game - set the wait time
-          if (index === 0 && !this.timer) {
-            this.timer = this.time.addEvent({
-              delay: 1000,
-              callback: this.updateCounter,
-              callbackScope: this,
-              loop: true,
-            });
-          }
+        // if the first to join the game - set the wait time
+        if (checkSetTimer(otherPlayer.playerId, index)) {
           return;
         }
         const player = this.add.sprite(0, 0, "coolLink", "idle_01.png");
@@ -119,16 +126,8 @@ export default class LavaScene extends Phaser.Scene {
         this.otherPlayers.clear();
         // map through existing players and add to game list
         data.players.map((otherPlayer: Player, index: number) => {
-          if (this.socket.id === otherPlayer.playerId) {
-            // if the first to join the game - set the wait time
-            if (index === 0 && !this.timer) {
-              this.timer = this.time.addEvent({
-                delay: 1000,
-                callback: this.updateCounter,
-                callbackScope: this,
-                loop: true,
-              });
-            }
+          // if the first to join the game - set the wait time
+          if (checkSetTimer(otherPlayer.playerId, index)) {
             return;
           }
           const player = this.add.sprite(0, 0, "coolLink", "idle_01.png");
@@ -164,33 +163,16 @@ export default class LavaScene extends Phaser.Scene {
         return;
       }
       events.emit("gameState", "gameEnd");
-      console.log("game end");
       this.emitMessages.push({ key: "leaderBoard", data: gameData });
-      // TODO: Is this page refresh needed?
-      this.counter = 30;
-      this.timer = this.time.addEvent({
-        delay: 1000,
-        callback: () => {
-          this.counter--;
-          if (this.counter < 0) {
-            this.timer.destroy();
-            window.location.reload();
-          }
-        },
-        callbackScope: this,
-        loop: true,
-      });
     });
 
     this.socket.on("dead", (data: any) => {
       console.log("a player died");
-      console.log("otherPlayers before: ", this.otherPlayers.size);
       const player = this.otherPlayers.get(data.id);
       if (player) {
         this.otherPlayers.delete(data.id);
         player.destroy();
       }
-      console.log("otherPlayers after: ", this.otherPlayers.size);
     });
   }
 

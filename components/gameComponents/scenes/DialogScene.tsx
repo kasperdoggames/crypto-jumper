@@ -27,9 +27,7 @@ export default class Dialog extends Scene {
   }
 
   create() {
-    const { width, height } = this.sys.game.canvas;
     const screenCenterX = this.game.renderer.width / 2;
-    const screenCenterY = this.game.renderer.height / 2;
 
     this.dialogTitle = this.add
       .text(screenCenterX, 330, "", {
@@ -136,17 +134,19 @@ export default class Dialog extends Scene {
       }
     };
 
-    events.on("newGame", () => {
-      this.leaderboardBackground.setAlpha(0);
-      this.leaderboardTitle.setAlpha(0);
-      this.leaderboardTitle.setAlpha(0);
-      this.dialogBackground.setAlpha(1);
-      this.addToGameBtn.setInteractive();
-      this.addToGameBtn.setAlpha(1);
-      this.dialogText
-        .setText("Add yourself to the next\navailable game")
-        .setAlign("center")
-        .setAlpha(1);
+    events.on("gameState", async (state: string) => {
+      if (state === "newGame") {
+        this.leaderboardBackground.setAlpha(0);
+        this.leaderboardTitle.setAlpha(0);
+        this.leaderboardTitle.setAlpha(0);
+        this.dialogBackground.setAlpha(1);
+        this.addToGameBtn.setInteractive();
+        this.addToGameBtn.setAlpha(1);
+        this.dialogText
+          .setText("Add yourself to the next\navailable game")
+          .setAlign("center")
+          .setAlpha(1);
+      }
     });
 
     events.on("leaderBoard", (gameData: { leaderBoard: any[] }) => {
