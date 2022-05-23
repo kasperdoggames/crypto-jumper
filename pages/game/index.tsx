@@ -37,7 +37,7 @@ const Home: NextPage = () => {
 
   useEffect(() => {
     init();
-  }, [cryptAccount]);
+  }, [cryptAccount, hasNFT]);
 
   // Dynamic Loader to wait before loaing up the phaser game
   const DynamicLoader = dynamic(
