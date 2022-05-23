@@ -99,10 +99,10 @@ const Home: NextPage = () => {
                 <div className="w-2/3 py-4 space-y-8">
                   <p className="text-xl text-cyan-600 font-splatch">Step 4</p>
                   <ul className="text-lg leading-10 text-cyan-600 font-splatch">
-                    <li>Winning the round wins you all the staked tokens.</li>{" "}
+                    <li>Winning the round wins you all staked tokens.</li>{" "}
                     <li>
-                      No winners within 60 seconds and staked funds go back to
-                      the Coollink treasury.
+                      If there are no winners within 60 seconds all funds are
+                      lost.
                     </li>
                   </ul>
                 </div>
