@@ -151,6 +151,14 @@ export default class LavaScene extends Phaser.Scene {
         }
       );
 
+      // If coin picked up by other player destroy it
+      this.socket.on("coinCollected", (id: string) => {
+        const coin = this.coins.findCoin(id);
+        if (coin) {
+          coin.destroy();
+        }
+      });
+
       //listen on countdown updates
       this.socket.on(`lava_${gameData.gameId}_countdown`, (counter: number) => {
         this.counter = counter;

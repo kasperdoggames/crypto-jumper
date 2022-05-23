@@ -401,6 +401,10 @@ nextApp.prepare().then(() => {
       }
     });
 
+    socket.on("coinCollected", (id: string) => {
+      socket.broadcast.emit("coinCollected", id);
+    });
+
     socket.on("disconnect", () => {
       console.log("client disconnected", socket.id);
       const game = assignedPlayers.get(socket.id);
