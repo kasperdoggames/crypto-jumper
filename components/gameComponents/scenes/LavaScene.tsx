@@ -110,12 +110,16 @@ export default class LavaScene extends Phaser.Scene {
       // listen on game data updates
       this.socket.on(`lava_${gameData.gameId}`, (data: GameLevelData) => {
         if (data.gameState === "end" && this.gameState === "running") {
-          let isWinner = false;
+          let winners = false;
+          let playerIsWinner = false;
           console.log("awaiting results...");
-          if (data.winner && data.winner.playerId === this.socket.id) {
-            isWinner = true;
+          if (data.winner) {
+            winners = true;
+            if (data.winner.playerId === this.socket.id) {
+              playerIsWinner = true;
+            }
           }
-          events.emit("awaitingResults", isWinner);
+          events.emit("awaitingResults", winners, playerIsWinner);
           this.gameState = "end";
           this.otherPlayers.forEach((player) => {
             player.anims.play("idle");
@@ -365,6 +369,7 @@ export default class LavaScene extends Phaser.Scene {
             level: this.level,
             gameId: this.gameId,
             state: "end",
+            winner: true,
           });
         }
         if (other.position.y > coolLink.position.y) {
@@ -442,6 +447,7 @@ export default class LavaScene extends Phaser.Scene {
           level: this.level,
           gameId: this.gameId,
           state: "end",
+          winner: false,
         });
         return;
       }

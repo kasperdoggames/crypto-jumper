@@ -165,12 +165,17 @@ export default class Dialog extends Scene {
       this.leaderboardList.setText(output.join("\n")).setAlpha(1);
     });
 
-    events.on("awaitingResults", (isWinner: boolean) => {
-      const text = isWinner
-        ? "You Won!\nAwaiting Results.."
-        : "You Lost\nAwaiting Results..";
-      this.dialogBackground.setAlpha(1);
-      this.dialogTitle.setText(text).setAlign("center").setAlpha(1);
-    });
+    events.on(
+      "awaitingResults",
+      (winners: boolean, playerIsWinner: boolean) => {
+        const text = winners
+          ? playerIsWinner
+            ? "You Won!\nAwaiting Results.."
+            : "You Lost\nAwaiting Results.."
+          : "No winners this time";
+        this.dialogBackground.setAlpha(1);
+        this.dialogTitle.setText(text).setAlign("center").setAlpha(1);
+      }
+    );
   }
 }

@@ -333,6 +333,7 @@ nextApp.prepare().then(() => {
         level: string;
         gameId: string;
         state: "waiting" | "end" | "running";
+        winner?: boolean;
       }) => {
         const levelData = gameRooms.get(data.level);
         if (!levelData) {
@@ -343,8 +344,8 @@ nextApp.prepare().then(() => {
           return;
         }
         if (data.state === "end") {
-          console.log("a player has won - game state == end");
-          const winner = socket.id;
+          console.log("game state == end");
+          const winner = data.winner ? socket.id : undefined;
           const playerData = assignedPlayers.get(socket.id);
           if (!playerData) {
             console.log("no player data found");
@@ -355,20 +356,24 @@ nextApp.prepare().then(() => {
             console.log("No wallet found");
             return;
           }
-          gameData.winner = {
-            playerId: winner,
-            walletAddress: wallet,
-          };
+          gameData.winner = winner
+            ? {
+                playerId: winner,
+                walletAddress: wallet,
+              }
+            : undefined;
           gameData.gameState = data.state;
           levelData.set(data.gameId, gameData);
           gameRooms.set(data.level, levelData);
           io.emit(`lava_${data.gameId}`, gameData);
 
-          try {
-            const tx = await p2eGameContract.playerWon(wallet);
-            await tx.wait();
-          } catch (err) {
-            console.log(err);
+          if (gameData.winner) {
+            try {
+              const tx = await p2eGameContract.playerWon(wallet);
+              await tx.wait();
+            } catch (err) {
+              console.log(err);
+            }
           }
           return;
         }
