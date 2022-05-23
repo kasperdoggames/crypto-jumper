@@ -117,6 +117,9 @@ export default class LavaScene extends Phaser.Scene {
           }
           events.emit("awaitingResults", isWinner);
           this.gameState = "end";
+          this.otherPlayers.forEach((player) => {
+            player.anims.play("idle");
+          });
           return;
         }
         // refresh all players
@@ -145,9 +148,14 @@ export default class LavaScene extends Phaser.Scene {
             console.log("no other player", playerData.playerId);
             return;
           }
-          otherPlayer.setPosition(playerData.location.x, playerData.location.y);
-          otherPlayer?.anims?.play(playerData.state, true);
-          otherPlayer?.setFlipX(playerData.flipX);
+          if (this.gameState !== "end") {
+            otherPlayer.setPosition(
+              playerData.location.x,
+              playerData.location.y
+            );
+            otherPlayer?.anims?.play(playerData.state, true);
+            otherPlayer?.setFlipX(playerData.flipX);
+          }
         }
       );
 
@@ -451,7 +459,6 @@ export default class LavaScene extends Phaser.Scene {
       for (let i = 0; i < this.emitMessages.length; i++) {
         const data = this.emitMessages.pop();
         if (data) {
-          console.log("emit game: ", { data });
           events.emit(data.key, data.data);
         }
       }
@@ -459,9 +466,11 @@ export default class LavaScene extends Phaser.Scene {
     if (this.loading || this.counter >= 0) {
       return;
     }
-    // run through state for player controller
-    this.player.stateMachine.step();
-    // update lava
-    this.lava.update();
+    if (this.gameState !== "end") {
+      // run through state for player controller
+      this.player.stateMachine.step();
+      // update lava
+      this.lava.update();
+    }
   }
 }
