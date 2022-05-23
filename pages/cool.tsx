@@ -8,7 +8,7 @@ import { toIpfsGatewayURL } from "../support/eth";
 
 const Cool: NextPage = () => {
   const { data: account } = useAccount();
-  const [nftMetadata, setNftMetadata] = useState({});
+  const [nftMetadata, setNftMetadata] = useState<any>({});
   useEffect(() => {
     const getNftMetadata = async (ethereum: any, walletAddress: string) => {
       const metadata = await getNFTTokenMetadata(ethereum, walletAddress);
