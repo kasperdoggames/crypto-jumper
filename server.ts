@@ -86,6 +86,7 @@ nextApp.prepare().then(() => {
   };
 
   let gameState: "Begin" | "New" | "Started" | "Finished";
+  let currentGameId: number;
 
   app.set("port", process.env.PORT || 3000);
   app.use(forceSsl);
@@ -164,6 +165,7 @@ nextApp.prepare().then(() => {
     p2eGameContract.on("NewGame", (gameId: any) => {
       console.log("NewGame received");
       gameState = "New";
+      currentGameId = Number(gameId);
       console.log("emitting newgame");
       io.emit("newGame", { gameId });
     });
@@ -369,7 +371,14 @@ nextApp.prepare().then(() => {
 
           if (gameData.winner) {
             try {
-              const tx = await p2eGameContract.playerWon(wallet);
+              const tx = await p2eGameContract.playerWon(wallet, currentGameId);
+              await tx.wait();
+            } catch (err) {
+              console.log(err);
+            }
+          } else {
+            try {
+              const tx = await p2eGameContract.allPlayersLost(currentGameId);
               await tx.wait();
             } catch (err) {
               console.log(err);
