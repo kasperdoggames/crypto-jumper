@@ -5,7 +5,7 @@ import http from "http";
 import { v4 as uuidv4 } from "uuid";
 import { P2EGAME_CONTRACT_ADDRESS } from "./support/contract_addresses";
 import P2EGameJson from "./support/P2EGame.json";
-import { BytesLike, ethers } from "ethers";
+import { BigNumber, BytesLike, ethers } from "ethers";
 import forceSsl from "./support/forceSsl";
 
 const dev = process.env.NODE_ENV !== "production";
@@ -86,7 +86,7 @@ nextApp.prepare().then(() => {
   };
 
   let gameState: "Begin" | "New" | "Started" | "Finished";
-  let currentGameId: number;
+  let currentGameId: BigNumber;
 
   app.set("port", process.env.PORT || 3000);
   app.use(forceSsl);
@@ -165,7 +165,7 @@ nextApp.prepare().then(() => {
     p2eGameContract.on("NewGame", (gameId: any) => {
       console.log("NewGame received");
       gameState = "New";
-      currentGameId = Number(gameId);
+      currentGameId = gameId;
       console.log("emitting newgame");
       io.emit("newGame", { gameId });
     });
@@ -282,8 +282,9 @@ nextApp.prepare().then(() => {
   io.on("connection", async (socket) => {
     console.log("a user connected", socket.id);
     const res: number = await p2eGameContract.gameSessionState();
+    const gameId: BigNumber = await p2eGameContract.gameId();
+    currentGameId = gameId;
     gameState = GameSessionStateEnum[res];
-    console.log({ gameState });
     if (gameState === "New") {
       socket.emit("newGame");
     }
