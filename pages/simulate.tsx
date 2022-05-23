@@ -53,6 +53,10 @@ export default function Home() {
       handlePlayerWonEvent(address, Date.now());
     });
 
+    p2eGameContract.on("AllPlayersLost", (gameId) => {
+      console.log("AllPlayersLost", Number(gameId));
+    });
+
     p2eGameContract.on("NewGame", (gameId) => {
       console.log("NewGame", Number(gameId));
       setCurrentGameId(Number(gameId));
