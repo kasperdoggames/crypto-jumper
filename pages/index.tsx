@@ -14,7 +14,7 @@ const Home: NextPage = () => {
           <Navbar currentPageHref={"/"} />
           <div className="flex flex-col items-center bg-gray-900">
             <img src="/assets/splash.png" />
-            <p className="pt-12 pb-4 text-4xl text-white font-splatch">
+            <p className="pt-12 pb-4 text-3xl text-white font-splatch">
               &lt;How to play&gt;
             </p>
             <div className="w-full p-12 space-y-8">
@@ -29,14 +29,17 @@ const Home: NextPage = () => {
                     Mint NFT
                   </div>
                 </div>
-                <div className="w-1/2 py-4 space-y-8">
+                <div className="w-2/3 py-4 space-y-8">
                   <p className="text-2xl font-splatch text-violet-600">
                     Step 1
                   </p>
-                  <p className="text-lg leading-10 font-splatch text-violet-600">
-                    Mint your unique and personal Coollink NFT. Minting your NFT
-                    gives you 10 $COOL tokens and access to play.
-                  </p>
+                  <ul className="leading-10 font-splatch text-violet-600">
+                    <li>Mint your unique and personal Coollink NFT.</li>{" "}
+                    <li>
+                      Minting your NFT gives you 10 $COOL tokens and access to
+                      play.
+                    </li>
+                  </ul>
                 </div>
               </div>
 
@@ -47,18 +50,19 @@ const Home: NextPage = () => {
                     src="/assets/cool_token.png"
                     alt="Cool Token"
                   />
-                  <div className="text-lg font-bold text-white font-splatch">
+                  <div className="font-bold text-white font-splatch">
                     Stake $COOL
                   </div>
                 </div>
-                <div className="w-1/2 py-4 space-y-8">
+                <div className="w-2/3 py-4 space-y-8">
                   <p className="text-2xl text-yellow-600 font-splatch">
                     Step 2
                   </p>
-                  <p className="text-lg leading-10 text-yellow-600 font-splatch">
-                    Stake $COOL to play the game. Each game costs 1 $COOL token.
-                    Owning an NFT yields 1 additional $COOL per hour.
-                  </p>
+                  <ul className="leading-10 text-yellow-600 font-splatch">
+                    <li>Stake $COOL to play the game.</li>{" "}
+                    <li>Each game costs 1 $COOL token.</li>
+                    <li>Owning an NFT yields 1 additional $COOL per hour.</li>
+                  </ul>
                 </div>
               </div>
 
@@ -73,12 +77,15 @@ const Home: NextPage = () => {
                     Play
                   </div>
                 </div>
-                <div className="w-1/2 py-4 space-y-8">
+                <div className="w-2/3 py-4 space-y-8">
                   <p className="text-2xl text-green-600 font-splatch">Step 3</p>
-                  <p className="text-lg leading-10 text-green-600 font-splatch">
-                    Play against fellow NFT holders in this multiplayer
-                    platformer.
-                  </p>
+                  <ul className="leading-10 text-green-600 font-splatch">
+                    <li>
+                      Play against fellow NFT holders in this multiplayer
+                      platformer.
+                    </li>
+                    <li>Up to 10 simultaneous players!</li>
+                  </ul>
                 </div>
               </div>
 
@@ -93,13 +100,15 @@ const Home: NextPage = () => {
                     Win
                   </div>
                 </div>
-                <div className="w-1/2 py-4 space-y-8">
+                <div className="w-2/3 py-4 space-y-8">
                   <p className="text-2xl text-cyan-600 font-splatch">Step 4</p>
-                  <p className="text-lg leading-10 text-cyan-600 font-splatch">
-                    Winning the round wins you all the staked tokens. No winners
-                    within 60 seconds and staked funds go back to the Coollink
-                    treasury.
-                  </p>
+                  <ul className="text-lg leading-10 text-cyan-600 font-splatch">
+                    <li>Winning the round wins you all the staked tokens.</li>{" "}
+                    <li>
+                      No winners within 60 seconds and staked funds go back to
+                      the Coollink treasury.
+                    </li>
+                  </ul>
                 </div>
               </div>
             </div>
