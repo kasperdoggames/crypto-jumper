@@ -5,6 +5,7 @@ import { getNFTTokenMetadata } from "../support/nftToken";
 import { useAccount } from "wagmi";
 import { useEffect, useState } from "react";
 import { toIpfsGatewayURL } from "../support/eth";
+import Footer from "../components/Footer";
 
 const Cool: NextPage = () => {
   const { data: account } = useAccount();
@@ -23,7 +24,7 @@ const Cool: NextPage = () => {
   }, [account]);
 
   return (
-    <div className="bg-gray-900">
+    <div className="bg-gray-800">
       <div className="container h-full mx-auto max-w-7xl">
         <Head>
           <title>Crypto Jumper</title>
@@ -34,7 +35,7 @@ const Cool: NextPage = () => {
             Powered by CoolLink NFTs and $COOL Tokens
           </h1>
           <div className="py-4 text-center">
-            <h2 className="pt-4 pb-8 text-xl text-center text-white font-splatch">
+            <h2 className="pt-4 pb-8 text-xl text-center text-indigo-500 font-splatch">
               Your Personal Coollink NFT
             </h2>
             {nftMetadata && nftMetadata.image ? (
@@ -56,7 +57,7 @@ const Cool: NextPage = () => {
           </div>
           <div className="w-2/3 px-8">
             <div className="flex flex-col items-center">
-              <h2 className="py-8 text-xl text-white font-splatch">
+              <h2 className="py-8 text-xl text-indigo-500 font-splatch">
                 $COOL Tokens
               </h2>
               <ul className="space-y-4">
@@ -77,6 +78,9 @@ const Cool: NextPage = () => {
               </ul>
             </div>
           </div>
+        </div>
+        <div className="">
+          <Footer />
         </div>
       </div>
     </div>

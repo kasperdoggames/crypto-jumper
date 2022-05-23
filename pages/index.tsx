@@ -1,5 +1,6 @@
 import type { NextPage } from "next";
 import Head from "next/head";
+import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 
 const Home: NextPage = () => {
@@ -102,6 +103,9 @@ const Home: NextPage = () => {
                 </div>
               </div>
             </div>
+          </div>
+          <div className="bg-gray-900">
+            <Footer />
           </div>
         </div>
       </div>

@@ -48,7 +48,7 @@ const Navbar = ({ currentPageHref }: { currentPageHref: string }) => {
     <Disclosure as="nav" className="bg-gray-900">
       {({ open }) => (
         <>
-          <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+          <div className="px-4 mx-auto border-b max-w-7xl sm:px-6 lg:px-8 border-b-gray-300">
             <div className="flex justify-between h-16">
               <div className="flex">
                 <div className="flex items-center mr-2 -ml-2 md:hidden">
@@ -69,7 +69,7 @@ const Navbar = ({ currentPageHref }: { currentPageHref: string }) => {
                       src=""
                       alt="Coollink"
                     />
-                    <div className="hidden w-auto text-2xl text-white lg:block font-splatch">
+                    <div className="hidden w-auto text-2xl text-yellow-500 lg:block font-splatch">
                       COOLLINK!
                     </div>
                   </a>
