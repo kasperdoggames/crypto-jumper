@@ -48,7 +48,7 @@ const Navbar = ({ currentPageHref }: { currentPageHref: string }) => {
     <Disclosure as="nav" className="bg-gray-900">
       {({ open }) => (
         <>
-          <div className="px-4 mx-auto border-b max-w-7xl sm:px-6 lg:px-8 border-b-gray-300">
+          <div className="px-4 mx-auto border-b border-gray-500 max-w-7xl sm:px-6 lg:px-8">
             <div className="flex justify-between h-16">
               <div className="flex">
                 <div className="flex items-center mr-2 -ml-2 md:hidden">
