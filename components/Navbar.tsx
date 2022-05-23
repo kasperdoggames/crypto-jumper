@@ -7,7 +7,7 @@ import { getGameNFTTokenContract, toIpfsGatewayURL } from "../support/eth";
 
 const navigation = [
   { name: "Play ", href: "game", current: false },
-  { name: "$COOL ", href: "cool", current: false },
+  { name: "What's COOL?", href: "cool", current: false },
 ];
 
 const userNavigation = [{ name: "Disconnect", href: "#" }];
