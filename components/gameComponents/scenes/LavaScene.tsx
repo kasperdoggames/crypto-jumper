@@ -180,9 +180,14 @@ export default class LavaScene extends Phaser.Scene {
 
     this.socket.on("gameEnd", (gameData: any) => {
       if (this.gameState !== "end") {
+        // game end before client game finished
+        this.gameState = "end";
+        this.emitMessages.push({ key: "gameState", data: "gameTimeout" });
+        setTimeout(() => {
+          this.emitMessages.push({ key: "leaderBoard", data: gameData });
+        }, 3000);
         return;
       }
-      events.emit("gameState", "gameEnd");
       this.emitMessages.push({ key: "leaderBoard", data: gameData });
     });
 

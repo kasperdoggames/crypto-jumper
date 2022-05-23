@@ -135,17 +135,26 @@ export default class Dialog extends Scene {
     };
 
     events.on("gameState", async (state: string) => {
-      if (state === "newGame") {
-        this.leaderboardBackground.setAlpha(0);
-        this.leaderboardTitle.setAlpha(0);
-        this.leaderboardTitle.setAlpha(0);
-        this.dialogBackground.setAlpha(1);
-        this.addToGameBtn.setInteractive();
-        this.addToGameBtn.setAlpha(1);
-        this.dialogText
-          .setText("Add yourself to the next\navailable game")
-          .setAlign("center")
-          .setAlpha(1);
+      this.leaderboardBackground.setAlpha(0);
+      this.leaderboardTitle.setAlpha(0);
+      this.leaderboardTitle.setAlpha(0);
+      this.dialogBackground.setAlpha(1);
+      switch (state) {
+        case "newGame":
+          this.addToGameBtn.setInteractive();
+          this.addToGameBtn.setAlpha(1);
+          this.dialogText
+            .setText("Add yourself to the next\navailable game")
+            .setAlign("center")
+            .setAlpha(1);
+          break;
+        case "gameTimeout":
+          this.dialogText
+            .setText("Out of time!\nNobody wins")
+            .setAlign("center")
+            .setAlpha(1);
+        default:
+          break;
       }
     });
 
