@@ -349,7 +349,7 @@ const Home: NextPage = () => {
                       className="inline-flex justify-center w-full px-4 py-4 text-base font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm font-splatch hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm"
                       onClick={() => setShowNFTMintedDialog(false)}
                     >
-                      Let's use it!
+                      Let&apos;s use it!
                     </button>
                   </div>
                 </Dialog.Panel>
