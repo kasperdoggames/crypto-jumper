@@ -15,6 +15,8 @@ import Navbar from "../../components/Navbar";
 import LoadingScreen from "../../components/Loading";
 import { P2EGAME_CONTRACT_ADDRESS } from "../../support/contract_addresses";
 import { Dialog, Transition } from "@headlessui/react";
+import { getNFTTokenMetadata } from "../../support/nftToken";
+import { toIpfsGatewayURL } from "../../support/eth";
 
 const Home: NextPage = () => {
   const [cryptAccount, setCryptAccount] =
@@ -27,7 +29,9 @@ const Home: NextPage = () => {
   const [gameTokenBalance, setGameTokenBalance] = useState<number | null>(null);
   const [gameAllowance, setGameAllowance] = useState<number | null>(null);
   const [tokensStaked, setTokensStaked] = useState(0);
-  const [open, setOpen] = useState(false);
+  const [showStakeCoolDialog, setShowStakeCoolDialog] = useState(false);
+  const [showNFTMintedDialog, setShowNFTMintedDialog] = useState(false);
+  const [nftMetadata, setNftMetadata] = useState<any>({});
 
   useEffect(() => {
     if (account) {
@@ -37,6 +41,41 @@ const Home: NextPage = () => {
 
   useEffect(() => {
     init();
+  }, [cryptAccount, hasNFT]);
+
+  useEffect(() => {
+    const { ethereum } = window;
+    const gameNFTTokenContract = getGameNFTTokenContract(ethereum);
+    if (!gameNFTTokenContract) {
+      return;
+    }
+
+    gameNFTTokenContract.on(
+      "Transfer",
+      (from: String, to: String, tokenId: Number) => {
+        console.log("Transfer", from, to, tokenId);
+        if (to === cryptAccount?.address) {
+          setShowNFTMintedDialog(true);
+        }
+      }
+    );
+
+    return () => {
+      gameNFTTokenContract.removeAllListeners("Transfer");
+    };
+  }, [cryptAccount]);
+
+  useEffect(() => {
+    const getNftMetadata = async (ethereum: any, walletAddress: string) => {
+      const metadata = await getNFTTokenMetadata(ethereum, walletAddress);
+      console.log({ metadata });
+      setNftMetadata(metadata);
+    };
+
+    if (cryptAccount && cryptAccount.address) {
+      const { ethereum } = window;
+      getNftMetadata(ethereum, cryptAccount.address);
+    }
   }, [cryptAccount, hasNFT]);
 
   // Dynamic Loader to wait before loaing up the phaser game
@@ -147,8 +186,12 @@ const Home: NextPage = () => {
 
   return (
     <div className="bg-gray-900">
-      <Transition.Root show={open} as={Fragment}>
-        <Dialog as="div" className="relative z-10" onClose={setOpen}>
+      <Transition.Root show={showStakeCoolDialog} as={Fragment}>
+        <Dialog
+          as="div"
+          className="relative z-10"
+          onClose={setShowStakeCoolDialog}
+        >
           <Transition.Child
             as={Fragment}
             enter="ease-out duration-300"
@@ -236,11 +279,77 @@ const Home: NextPage = () => {
                       type="button"
                       className="inline-flex justify-center w-full px-4 py-4 text-base font-medium text-white bg-yellow-600 border border-transparent rounded-md shadow-sm font-splatch hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 sm:text-sm"
                       onClick={() => {
-                        setOpen(false);
+                        setShowStakeCoolDialog(false);
                         handleStakeFunds();
                       }}
                     >
                       Stake $COOL
+                    </button>
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition.Root>
+
+      <Transition.Root show={showNFTMintedDialog} as={Fragment}>
+        <Dialog
+          as="div"
+          className="relative z-10"
+          onClose={setShowNFTMintedDialog}
+        >
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 z-10 overflow-y-auto">
+            <div className="flex items-end justify-center min-h-full p-4 text-center sm:items-center sm:p-0">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                enterTo="opacity-100 translate-y-0 sm:scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 translate-y-0 sm:scale-100"
+                leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+              >
+                <Dialog.Panel className="relative px-4 pt-5 pb-4 overflow-hidden text-left transition-all transform bg-white rounded-lg shadow-xl sm:my-8 sm:max-w-sm sm:w-full sm:p-6">
+                  <div>
+                    <div className="mt-3 text-center sm:mt-5">
+                      <Dialog.Title
+                        as="h3"
+                        className="text-lg font-medium leading-6 text-gray-900 font-splatch"
+                      >
+                        You are now the proud owner of a Coollink NFT!
+                      </Dialog.Title>
+                      <div className="flex flex-col items-center pt-4 space-y-4">
+                        {nftMetadata && nftMetadata.image && (
+                          <div className="flex items-center justify-center bg-white rounded-full w-52 h-52">
+                            <img
+                              className="w-48 h-48 rounded-full "
+                              src={toIpfsGatewayURL(nftMetadata.image)}
+                            ></img>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-5 sm:mt-6">
+                    <button
+                      type="button"
+                      className="inline-flex justify-center w-full px-4 py-4 text-base font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm font-splatch hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm"
+                      onClick={() => setShowNFTMintedDialog(false)}
+                    >
+                      Let's use it!
                     </button>
                   </div>
                 </Dialog.Panel>
@@ -315,7 +424,7 @@ const Home: NextPage = () => {
                         </div>
                         <button
                           className="flex flex-col items-center px-12 pt-4 pb-6 bg-yellow-600 border-4 border-white drop-shadow-2xl hover:bg-yellow-500 rounded-xl shadow-white"
-                          onClick={() => setOpen(true)}
+                          onClick={() => setShowStakeCoolDialog(true)}
                         >
                           <img
                             className="pb-4"
