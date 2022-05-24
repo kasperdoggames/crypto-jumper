@@ -52,7 +52,7 @@ const Home: NextPage = () => {
 
     gameNFTTokenContract.on(
       "Transfer",
-      (from: String, to: String, tokenId: Number) => {
+      (from: string, to: string, tokenId: number) => {
         console.log("Transfer", from, to, tokenId);
         if (to === cryptAccount?.address) {
           setShowNFTMintedDialog(true);

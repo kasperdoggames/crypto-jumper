@@ -21,6 +21,7 @@ function classNames(...classes: string[]) {
 const Navbar = ({ currentPageHref }: { currentPageHref: string }) => {
   const { data: account } = useAccount();
   const [avatarImageUrl, setAvatarImageUrl] = useState(DEFAULT_AVATAR_IMAGEURL);
+  const [hasNFT, setHasNFT] = useState(false);
 
   useEffect(() => {
     const getNFTTokens = async () => {
@@ -37,6 +38,28 @@ const Navbar = ({ currentPageHref }: { currentPageHref: string }) => {
       }
     };
     getNFTTokens();
+  }, [account, hasNFT]);
+
+  useEffect(() => {
+    const { ethereum } = window;
+    const gameNFTTokenContract = getGameNFTTokenContract(ethereum);
+    if (!gameNFTTokenContract) {
+      return;
+    }
+
+    gameNFTTokenContract.on(
+      "Transfer",
+      (from: string, to: string, tokenId: number) => {
+        console.log("Transfer", from, to, tokenId);
+        if (to === account?.address) {
+          setHasNFT(true);
+        }
+      }
+    );
+
+    return () => {
+      gameNFTTokenContract.removeAllListeners("Transfer");
+    };
   }, [account]);
 
   navigation.map((nav) => {
