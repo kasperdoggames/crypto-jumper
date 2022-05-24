@@ -90,8 +90,8 @@ const Navbar = ({ currentPageHref }: { currentPageHref: string }) => {
                 <div className="flex items-center flex-shrink-0">
                   <a href="/">
                     <img
-                      className="block w-auto h-8 lg:hidden"
-                      src=""
+                      className="block w-auto h-10 lg:hidden"
+                      src="/assets/coollink_avatar.png"
                       alt="Coollink"
                     />
                     <div className="hidden w-auto text-2xl text-yellow-500 lg:block font-splatch">
