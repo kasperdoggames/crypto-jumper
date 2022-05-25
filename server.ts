@@ -169,7 +169,7 @@ nextApp.prepare().then(() => {
       gameState = "New";
       currentGameId = gameId;
       console.log("emitting newgame");
-      io.emit("newGame", { gameId });
+      io.emit("newGame", { gameId, roomSet });
     });
 
     p2eGameContract.on("GameStarted", (gameId: any) => {
@@ -189,7 +189,7 @@ nextApp.prepare().then(() => {
         return;
       }
 
-      io.emit("gameData", { gameId: lastSlot[0], ...lastSlot[1] });
+      io.emit("gameData", { gameId: lastSlot[0], ...lastSlot[1], roomSet });
       // broadcast for any other players on same channel
       // io.emit(`${roomRequested}_${lastSlot[0]}`, lastSlot[1]);
     });
@@ -199,7 +199,7 @@ nextApp.prepare().then(() => {
       try {
         if (roomSet) {
           gameRooms.delete(roomSet);
-          roomSet = undefined;
+          roomSet = roomSet === "lava" ? "construction" : "lava";
         }
         const leaderBoardData = await getWinners();
         const top5 = leaderBoardData ? leaderBoardData.slice(0, 5) : [];
@@ -284,8 +284,8 @@ nextApp.prepare().then(() => {
     const gameId: BigNumber = await p2eGameContract.gameId();
     currentGameId = gameId;
     gameState = GameSessionStateEnum[res];
-    if (gameState === "New") {
-      socket.emit("newGame");
+    if (gameState === "New" && roomSet) {
+      socket.emit("newGame", { gameId, roomSet });
     }
 
     /*

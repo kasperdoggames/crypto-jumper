@@ -33,6 +33,7 @@ interface GameLevelData {
   players: Player[];
   gameState: gameState;
   winner?: Player;
+  roomSet?: string;
 }
 
 interface PlayerData {
@@ -54,12 +55,15 @@ export default class SocketClient {
     // set loading is true while obtaining list of other players
     this.scene.loading = true;
 
-    this.socket.on("newGame", () => {
+    this.socket.on("newGame", (data: { roomSet: string; gameId: number }) => {
       if (this.scene.gameState === "end") {
         // reload window
         window.location.reload();
       }
-      if (this.scene.gameState === "waiting") {
+      if (
+        this.scene.gameState === "waiting" &&
+        data.roomSet === this.scene.level
+      ) {
         console.log("newGame received");
         this.scene.emitMessages.push({ key: "gameState", data: "newGame" });
       }
@@ -67,7 +71,10 @@ export default class SocketClient {
 
     // wait for response from server on game object
     this.socket.on("gameData", (gameData: GameLevelData) => {
-      if (this.scene.gameState !== "waiting") {
+      if (
+        this.scene.gameState !== "waiting" ||
+        gameData.roomSet !== this.scene.level
+      ) {
         return;
       }
       console.log("gameData received: ", { gameData });
