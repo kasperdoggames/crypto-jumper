@@ -70,7 +70,7 @@ export default class UI extends Scene {
       .fillRoundedRect((this.game.renderer.width - 500) / 2, 220, 500, 230, 32)
       .fillStyle(0xf7bc27, 1)
       .fillRoundedRect((this.game.renderer.width - 480) / 2, 230, 480, 210, 32)
-      .setAlpha(0);
+      .setAlpha(1);
 
     const exitButton = this.add.text(
       this.game.renderer.width - 150,
@@ -139,7 +139,7 @@ export default class UI extends Scene {
       })
       .setAlign("center")
       .setOrigin(0.5)
-      .setAlpha(0);
+      .setAlpha(1);
 
     this.playerMessage = this.add
       .text(screenCenterX, 330, "", {
