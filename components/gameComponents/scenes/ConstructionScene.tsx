@@ -86,16 +86,14 @@ export default class ConstructionScene extends Phaser.Scene {
     ground.setCollisionByProperty({ collides: true });
 
     // testing parallax
-    this.bg_1 = this.add.tileSprite(
-      0,
-      0,
-      Number(this.game.renderer.width),
-      Number(this.game.renderer.height),
-      "bg_1"
-    );
-    this.bg_1.setOrigin(0, 0);
+    this.bg_1 = this.add.tileSprite(0, 0, 0, 0, "bg_1");
+    this.bg_1.setOrigin(0, 0.2);
     this.bg_1.setScrollFactor(0);
     this.bg_1.setDepth(-1);
+    this.bg_1.setScale(
+      this.game.renderer.width / this.bg_1.width,
+      this.game.renderer.height / this.bg_1.height
+    );
 
     // convert the layer to matter physics for ground
     this.matter.world.convertTilemapLayer(ground);

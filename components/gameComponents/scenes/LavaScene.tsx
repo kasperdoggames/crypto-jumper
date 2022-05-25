@@ -86,13 +86,7 @@ export default class LavaScene extends Phaser.Scene {
     ground.setCollisionByProperty({ collides: true });
 
     // testing parallax
-    this.bg_1 = this.add.tileSprite(
-      0,
-      0,
-      Number(this.game.renderer.width),
-      Number(this.game.renderer.height),
-      "bg_1"
-    );
+    this.bg_1 = this.add.tileSprite(0, 0, 0, 0, "bg_1");
     this.bg_1.setOrigin(0, 0);
     this.bg_1.setScrollFactor(0);
     this.bg_1.setDepth(-1);
