@@ -19,7 +19,7 @@ export class PlayerController {
 
   constructor(scene: any) {
     this.scene = scene;
-    this.socket = scene.socket;
+    this.socket = scene.socketClient.socket;
     this.level = scene.level;
 
     // create a player instance from the spritesheet

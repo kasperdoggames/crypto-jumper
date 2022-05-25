@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import "phaser";
 import UI from "./scenes/UIScene";
 import LavaScene from "./scenes/LavaScene";
+import ConstructionScene from "./scenes/ConstructionScene";
 import MainMenu from "./scenes/MainMenuScene";
 import Dialog from "./scenes/DialogScene";
 
@@ -55,11 +56,31 @@ const GameManager = () => {
       false
     );
 
+    const availableLevels = {
+      lava: LavaScene,
+      construction: ConstructionScene,
+    };
+
+    const getLevel = async (): Promise<"lava" | "construction"> => {
+      try {
+        const res = await fetch("/api/currentLevel");
+        const data = await res.json();
+        return data.level;
+      } catch (err) {
+        console.log(err);
+        throw err;
+      }
+    };
+
+    const level = await getLevel();
+    console.log("loading level: ", level);
     game.scene.add("main", MainMenu);
     game.scene.add("lavaScene", LavaScene);
+    game.scene.add("constructionScene", ConstructionScene);
+    game.scene.add("currentLevel", availableLevels[level]);
     game.scene.add("ui", UI);
     game.scene.add("dialog", Dialog);
-    game.scene.start("lavaScene");
+    game.scene.start("currentLevel");
   };
 
   return null;

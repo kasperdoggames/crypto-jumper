@@ -87,6 +87,8 @@ nextApp.prepare().then(() => {
 
   let gameState: "Begin" | "New" | "Started" | "Finished";
   let currentGameId: BigNumber;
+  let roomSet: string | undefined;
+  let lastRoom: string | undefined;
 
   app.set("port", process.env.PORT || 3000);
   app.use(forceSsl);
@@ -171,9 +173,12 @@ nextApp.prepare().then(() => {
     });
 
     p2eGameContract.on("GameStarted", (gameId: any) => {
+      if (!roomSet) {
+        console.log("no room set");
+        return;
+      }
       gameState = "Started";
-      const roomRequested = "lava";
-      const levelData = gameRooms.get(roomRequested);
+      const levelData = gameRooms.get(roomSet);
       if (!levelData || levelData.size === 0) {
         return;
       }
@@ -192,18 +197,9 @@ nextApp.prepare().then(() => {
     p2eGameContract.on("GameFinished", async (gameId: any) => {
       gameState = "Finished";
       try {
-        const levelData = gameRooms.get("lava");
-        if (levelData) {
-          // clear all level data
-          levelData.clear();
-          const gameId = uuidv4();
-          const gameData: GameLevelData = {
-            players: [],
-            gameState: "waiting",
-          };
-          levelData.set(gameId, gameData);
-          gameRooms.set("lava", levelData);
-          assignedPlayers.clear();
+        if (roomSet) {
+          gameRooms.delete(roomSet);
+          roomSet = undefined;
         }
         const leaderBoardData = await getWinners();
         const top5 = leaderBoardData ? leaderBoardData.slice(0, 5) : [];
@@ -231,21 +227,24 @@ nextApp.prepare().then(() => {
       "PlayerJoinedGame",
       (address: string, clientId: string) => {
         console.log("PlayerJoinedGame", address, clientId);
+        if (!roomSet) {
+          console.log("no room set");
+          return;
+        }
 
         // find socketid and add account
         // check if socketId is still connected
 
-        const roomRequested = "lava";
-        const levelData = gameRooms.get(roomRequested);
+        const levelData = gameRooms.get(roomSet);
         // if no level, create one and add player to slot 1
         if (!levelData || levelData.size === 0) {
-          createLevel(roomRequested, clientId, address);
+          createLevel(roomSet, clientId, address);
           return;
         }
         // else check player count in last slot
         const lastSlot = Array.from(levelData).pop();
         if (!lastSlot) {
-          createLevel(roomRequested, clientId, address);
+          createLevel(roomSet, clientId, address);
           return;
         }
         lastSlot[1].players = lastSlot[1].players.filter((player) => {
@@ -253,7 +252,7 @@ nextApp.prepare().then(() => {
           return playerSocket?.connected;
         });
         if (lastSlot[1].players.length === 0) {
-          createLevel(roomRequested, clientId, address);
+          createLevel(roomSet, clientId, address);
           return;
         }
         if (
@@ -270,9 +269,9 @@ nextApp.prepare().then(() => {
           playerId: clientId,
         });
         levelData.set(lastSlot[0], lastSlot[1]);
-        gameRooms.set(roomRequested, levelData);
+        gameRooms.set(roomSet, levelData);
         assignedPlayers.set(clientId, {
-          room: `${roomRequested}_${lastSlot[0]}`,
+          room: `${roomSet}_${lastSlot[0]}`,
           walletAddress: address,
         });
       }
@@ -303,7 +302,7 @@ nextApp.prepare().then(() => {
     */
     socket.on("playerUpdate", (data: PlayerUpdateData) => {
       // broadcast for all other players listening for that game and instance
-      socket.broadcast.emit(`${data.level}_${data.gameId}_player`, {
+      socket.broadcast.emit(`${data.gameId}_player`, {
         playerId: socket.id,
         ...data.playerData,
       });
@@ -320,10 +319,7 @@ nextApp.prepare().then(() => {
     socket.on(
       "countdown",
       (data: { level: string; gameId: string; counter: number }) => {
-        socket.broadcast.emit(
-          `${data.level}_${data.gameId}_countdown`,
-          data.counter
-        );
+        socket.broadcast.emit(`${data.gameId}_countdown`, data.counter);
       }
     );
 
@@ -340,14 +336,16 @@ nextApp.prepare().then(() => {
       }) => {
         const levelData = gameRooms.get(data.level);
         if (!levelData) {
+          console.log("no level data");
           return;
         }
         const gameData = levelData.get(data.gameId);
         if (!gameData) {
+          console.log("no game data");
           return;
         }
         if (data.state === "end") {
-          console.log("game state == end");
+          console.log("received game state == end");
           const winner = data.winner ? socket.id : undefined;
           const playerData = assignedPlayers.get(socket.id);
           if (!playerData) {
@@ -368,7 +366,7 @@ nextApp.prepare().then(() => {
           gameData.gameState = data.state;
           levelData.set(data.gameId, gameData);
           gameRooms.set(data.level, levelData);
-          io.emit(`lava_${data.gameId}`, gameData);
+          io.emit(data.gameId, gameData);
 
           if (gameData.winner) {
             try {
@@ -445,6 +443,15 @@ nextApp.prepare().then(() => {
         resetGame(levelName, gameId);
       }
     });
+  });
+
+  app.get("/api/currentLevel", (_req, res) => {
+    if (roomSet) {
+      return res.json({ level: roomSet });
+    }
+    roomSet = lastRoom === "lava" ? "construction" : "lava";
+    lastRoom = roomSet;
+    res.json({ level: roomSet });
   });
 
   app.all("*", (req, res) => {

@@ -1,8 +1,8 @@
 import { Scene } from "phaser";
 import { createButton } from "../elements/ui/CustomButton";
 import { getP2EGameContract } from "../../../support/eth";
-import LavaScene from "./LavaScene";
 import { sharedInstance as events } from "../EventCenter";
+import { CustomGameScene } from "../SocketClient";
 
 export default class Dialog extends Scene {
   dialogBackground!: Phaser.GameObjects.Graphics;
@@ -122,10 +122,10 @@ export default class Dialog extends Scene {
       const p2eGameContract = getP2EGameContract(ethereum);
       if (p2eGameContract) {
         try {
-          const lavaScene = this.scene.manager.getScene(
-            "lavaScene"
-          ) as LavaScene;
-          const clientId = lavaScene.socket.id;
+          const currentLevelScene = this.scene.manager.getScene(
+            "currentLevel"
+          ) as CustomGameScene;
+          const clientId = currentLevelScene.socketClient.socket.id;
           const tx = await p2eGameContract.addPlayerToGameSession(clientId);
           await tx.wait();
         } catch (e) {
@@ -176,7 +176,13 @@ export default class Dialog extends Scene {
 
     events.on(
       "awaitingResults",
-      (winners: boolean, playerIsWinner: boolean) => {
+      ({
+        winners,
+        playerIsWinner,
+      }: {
+        winners: boolean;
+        playerIsWinner: boolean;
+      }) => {
         const text = winners
           ? playerIsWinner
             ? "You Won!\nAwaiting Results.."

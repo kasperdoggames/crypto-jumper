@@ -1,18 +1,13 @@
 import "phaser";
 import { Coins, CoinType } from "../elements/Coin";
-import { Lava } from "../elements/Lava";
-import {
-  createPlatform,
-  moveHorizontal,
-  moveVertical,
-} from "../elements/Platform";
 import { PlayerController } from "../playerController";
 import SocketClient from "../SocketClient";
 import { sharedInstance as events } from "../EventCenter";
+import { Concrete } from "../elements/Concrete";
 
 type gameState = "waiting" | "running" | "end";
 
-export default class LavaScene extends Phaser.Scene {
+export default class ConstructionScene extends Phaser.Scene {
   cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   player!: PlayerController;
   otherPlayers: Map<string, Phaser.GameObjects.Sprite> = new Map();
@@ -27,14 +22,14 @@ export default class LavaScene extends Phaser.Scene {
   level!: string;
   gameState: gameState = "waiting";
   emitMessages: { key: string; data: any }[] = [];
-  dangerZone!: Lava;
+  dangerZone!: Concrete;
 
   loadFromSocket() {
     this.socketClient = new SocketClient(this);
   }
 
   init() {
-    this.level = "lava";
+    this.level = "construction";
     // Load UI
     this.scene.launch("ui");
     this.scene.launch("dialog");
@@ -49,26 +44,28 @@ export default class LavaScene extends Phaser.Scene {
     this.load.atlas("coolLink", "assets/coolLink.png", "assets/coolLink.json");
 
     // tilemaps
-    this.load.image("lava_tiles", "assets/lava_tileset.png");
-    this.load.tilemapTiledJSON("tilemap", "assets/lava_scene.json");
+    this.load.image("construction_tiles", "assets/construction_tileset.png");
+    this.load.tilemapTiledJSON("tilemap2", "assets/construction_scene.json");
 
-    // coins and platforms
+    // coins and bell
     this.load.atlas("coin", "assets/coin.png", "assets/coin.json");
-    this.load.image("platformA", "assets/platformA.png");
     this.load.image("bell", "assets/bell.png");
 
-    // lava
-    this.load.spritesheet("lavaTileSprites", "assets/lava_tileset.png", {
-      frameWidth: 70,
-      frameHeight: 70,
-    });
+    // concrete
+    this.load.spritesheet(
+      "concreteTileSprites",
+      "assets/construction_tileset.png",
+      {
+        frameWidth: 70,
+        frameHeight: 70,
+      }
+    );
 
     // parallax
-    this.load.image("bg_1", "assets/volcano_bg.png");
+    this.load.image("bg_1", "assets/city_bg.png");
 
     // load audio
     this.load.audio("lavaMusic", "assets/lavaMusic.mp3");
-    this.load.audio("lavaSplash", "assets/lavaSplash.ogg");
     this.load.audio("coinPickup", "assets/coinPickup.ogg");
     this.load.audio("bell", "assets/bell.mp3");
   }
@@ -77,9 +74,12 @@ export default class LavaScene extends Phaser.Scene {
     // create coins class
     this.coins = new Coins(this);
     // create the tile map instance
-    const map = this.make.tilemap({ key: "tilemap" });
+    const map = this.make.tilemap({ key: "tilemap2" });
     // add the tileset to the map
-    const tileset = map.addTilesetImage("lava_tileset", "lava_tiles");
+    const tileset = map.addTilesetImage(
+      "construction_tileset",
+      "construction_tiles"
+    );
     // create the ground layer from the loaded tileset
     const ground = map.createLayer("ground", tileset);
     // set collisions based on custom value on the tilesheet data
@@ -132,20 +132,12 @@ export default class LavaScene extends Phaser.Scene {
             .setStatic(true)
             .setName("finish");
           break;
-        case "lava":
-          this.dangerZone = new Lava(this, x, y);
+        case "concrete":
+          this.dangerZone = new Concrete(this, x, y);
           break;
         case "coin":
           const coinType: CoinType = element.properties[0]?.value;
           this.coins.addCoin(this, x, y, coinType);
-          break;
-        case "platformA":
-          const platformA = createPlatform(this, x, y, "platformA");
-          moveVertical(this, platformA);
-          break;
-        case "platformB":
-          const platformB = createPlatform(this, x, y, "platformA");
-          moveHorizontal(this, platformB);
           break;
         default:
           break;
@@ -167,8 +159,8 @@ export default class LavaScene extends Phaser.Scene {
           bodyB.gameObject?.name === "coolLink"
             ? [bodyB, bodyA]
             : [bodyA, bodyB];
-        if (other.gameObject?.name === "lavaSprite") {
-          this.dangerZone.meltSound();
+        if (other.gameObject?.name === "concreteSprite") {
+          // this.lava.meltSound();
           this.player.stateMachine.transition("melt");
           return;
         }
@@ -291,8 +283,8 @@ export default class LavaScene extends Phaser.Scene {
     if (this.gameState !== "end") {
       // run through state for player controller
       this.player.stateMachine.step();
-      // update lava
-      this.dangerZone.update();
+      // update concrete
+      this.dangerZone?.update();
     }
   }
 }
