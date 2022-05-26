@@ -74,6 +74,8 @@ nextApp.prepare().then(() => {
     { room: string; walletAddress?: string }
   >();
 
+  const leaderboad = new Map<string, number>();
+
   type GameSates = "Begin" | "New" | "Started" | "Finished";
 
   const GameSessionStateEnum: {
@@ -158,7 +160,9 @@ nextApp.prepare().then(() => {
         ([, a]: any, [, b]: any) => b - a
       );
 
-      return sorted.map((item) => ({ playerAddress: item[0], count: item[1] }));
+      Object.entries(aggregated).map((item) => {
+        leaderboad.set(item[0], Number(item[1]));
+      });
     }
   };
 
@@ -191,8 +195,6 @@ nextApp.prepare().then(() => {
       }
 
       io.emit("gameData", { gameId: lastSlot[0], ...lastSlot[1], roomSet });
-      // broadcast for any other players on same channel
-      // io.emit(`${roomRequested}_${lastSlot[0]}`, lastSlot[1]);
     });
 
     p2eGameContract.on("GameFinished", async (gameId: any) => {
@@ -202,17 +204,16 @@ nextApp.prepare().then(() => {
           gameRooms.delete(roomSet);
           roomSet = roomSet === "lava" ? "construction" : "lava";
         }
-        const leaderBoardData = await getWinners();
+        const leaderBoardData = Array.from(leaderboad).sort(
+          ([, a], [, b]) => b - a
+        );
         const top5 = leaderBoardData ? leaderBoardData.slice(0, 5) : [];
         const top5AddressSliced = top5.map((item) => ({
-          playerAddress: `${item.playerAddress.slice(
-            0,
-            4
-          )}...${item.playerAddress.slice(
-            item.playerAddress.length - 4,
-            item.playerAddress.length
+          playerAddress: `${item[0].slice(0, 4)}...${item[0].slice(
+            item[0].length - 4,
+            item[0].length
           )}`,
-          count: item.count,
+          count: item[1],
         }));
         console.log("emitting: ", { leaderBoard: top5AddressSliced });
         io.emit("gameEnd", { leaderBoard: top5AddressSliced });
@@ -371,6 +372,13 @@ nextApp.prepare().then(() => {
 
           if (gameData.winner) {
             try {
+              // add to leaderboard local cache
+              const existingLeaderboadPlayerCount = leaderboad.get(wallet);
+              if (existingLeaderboadPlayerCount) {
+                leaderboad.set(wallet, existingLeaderboadPlayerCount + 1);
+              } else {
+                leaderboad.set(wallet, 1);
+              }
               const tx = await p2eGameContract.playerWon(wallet, currentGameId);
               await tx.wait();
             } catch (err) {
@@ -459,7 +467,9 @@ nextApp.prepare().then(() => {
     return handle(req, res);
   });
 
-  server.listen(app.get("port"), () => {
+  server.listen(app.get("port"), async () => {
+    // get leaderboard data for local cached copy
+    await getWinners();
     console.log(`Listening on ${app.get("port")}`);
   });
 });
