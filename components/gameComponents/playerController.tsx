@@ -40,6 +40,7 @@ export class PlayerController {
         run: this.runState,
         jump: this.jumpState,
         melt: this.meltState,
+        crumble: this.crumbleState,
       },
       [this]
     );
@@ -47,6 +48,17 @@ export class PlayerController {
 
   // Create animations
   createAnims() {
+    this.scene.anims.create({
+      key: "crumble",
+      frameRate: 18,
+      frames: this.sprite.anims.generateFrameNames("coolLink", {
+        start: 1,
+        end: 20,
+        prefix: "coolBreak00",
+        suffix: ".png",
+        zeroPad: 2,
+      }),
+    });
     this.scene.anims.create({
       key: "melt",
       frameRate: 18,
@@ -125,6 +137,27 @@ export class PlayerController {
         },
       });
     },
+  };
+
+  crumbleState = {
+    enter: () => {
+      this.sprite.setTint(0x737373);
+      this.sprite.setAlpha(0.8);
+      this.sprite.setVelocity(0);
+      this.socket.emit("playerUpdate", {
+        level: this.level,
+        gameId: this.scene.gameId,
+        playerData: {
+          state: "crumble",
+          location: this.sprite.body.position,
+        },
+      });
+      this.sprite.anims.play("crumble").on("animationcomplete", () => {
+        events.emit("playerMessage", "You Died");
+        events.emit("dead");
+      });
+    },
+    execute: () => {},
   };
 
   meltState = {

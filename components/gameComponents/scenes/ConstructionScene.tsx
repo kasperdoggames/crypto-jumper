@@ -159,7 +159,7 @@ export default class ConstructionScene extends Phaser.Scene {
             : [bodyA, bodyB];
         if (other.gameObject?.name === "concreteSprite") {
           // this.lava.meltSound();
-          this.player.stateMachine.transition("melt");
+          this.player.stateMachine.transition("crumble");
           return;
         }
         if (other.gameObject?.name === "coin") {

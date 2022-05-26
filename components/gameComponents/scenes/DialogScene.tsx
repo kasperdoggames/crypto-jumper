@@ -150,7 +150,7 @@ export default class Dialog extends Scene {
           break;
         case "gameTimeout":
           this.dialogText
-            .setText("Out of time!\nNobody wins")
+            .setText("Out of time!\nNobody wins\nWaiting for next game")
             .setAlign("center")
             .setAlpha(1);
         default:
@@ -187,7 +187,7 @@ export default class Dialog extends Scene {
           ? playerIsWinner
             ? "You Won!\nAwaiting Results.."
             : "You Lost\nAwaiting Results.."
-          : "No winners this time";
+          : "No winners this time\nWaiting for next game";
         this.dialogBackground.setAlpha(1);
         this.dialogTitle.setText(text).setAlign("center").setAlpha(1);
       }
