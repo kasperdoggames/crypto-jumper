@@ -7,6 +7,7 @@ You play as CoolLink in a multiplayer platform game. CoolLink is a personificati
 CoolLink can jump and double jump to reach higher platforms to avoid melting in lava or dying in other unfortunate ways.
 
 In order to play the game, the user is required to mint a unqiue CoolLink NFT through the web app via the use of MetaMask crypto wallet.
+
 Once the NFT is minted via the smart contract, the user is awarded 10 $cool tokens.
 $cool tokens can be staked to play the game (each game requires 1 $cool token). If the user wins the game, they are awarded all staked tokens. If nobody wins, all staked cool tokens are lost.
 
