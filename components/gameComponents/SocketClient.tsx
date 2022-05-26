@@ -92,7 +92,8 @@ export default class SocketClient {
         }
         const player = this.scene.add.sprite(0, 0, "coolLink", "idle_01.png");
         player.setAlpha(0.5);
-        player.setTint(0xb0b0b0);
+        player.setTintFill(0xffffff);
+        player.setDepth(-1);
         this.scene.otherPlayers.set(otherPlayer.playerId, player);
         this.scene.gameState = "running";
         this.scene.loading = false;
