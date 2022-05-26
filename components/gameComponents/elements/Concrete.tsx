@@ -45,7 +45,7 @@ export class Concrete {
     });
     this.concreteSprite.anims.play("run", true);
 
-    this.concretePart = scene.add.rectangle(0, 0, 1400, 1040, 0x696969);
+    this.concretePart = scene.add.rectangle(0, 0, 1400, 1040, 0x555555);
     this.concretePart.setDepth(1);
     this.concretePart.setPosition(x, y + 550);
   }
