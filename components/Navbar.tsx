@@ -9,6 +9,7 @@ import { getNFTTokenMetadata } from "../support/nftToken";
 const navigation = [
   { name: "Play ", href: "game", current: false },
   { name: "What's COOL?", href: "cool", current: false },
+  { name: "Credits", href: "credits", current: false },
 ];
 
 const userNavigation = [{ name: "Disconnect", href: "#" }];
