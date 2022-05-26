@@ -87,7 +87,7 @@ export default class ConstructionScene extends Phaser.Scene {
 
     // testing parallax
     this.bg_1 = this.add.tileSprite(0, 0, 0, 0, "bg_1");
-    this.bg_1.setOrigin(0, 0.2);
+    this.bg_1.setOrigin(0, 0.18);
     this.bg_1.setScrollFactor(0);
     this.bg_1.setDepth(-1);
     this.bg_1.setScale(

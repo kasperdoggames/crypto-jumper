@@ -137,6 +137,7 @@ nextApp.prepare().then(() => {
 
   const getWinners = async () => {
     if (p2eGameContract) {
+      console.log("getWinners!!!!");
       const filterPlayerWon = p2eGameContract.filters.PlayerWon(null);
       const items = await p2eGameContract.queryFilter(
         filterPlayerWon,

@@ -28,7 +28,6 @@ const Navbar = ({ currentPageHref }: { currentPageHref: string }) => {
       if (account && account.address) {
         const { ethereum } = window;
         const metadata = await getNFTTokenMetadata(ethereum, account.address);
-        console.log({ metadata });
         if (metadata) {
           const imageUrl = toIpfsGatewayURL(metadata.image);
           setAvatarImageUrl(imageUrl);
