@@ -161,17 +161,13 @@ export default class Dialog extends Scene {
 
     const loadImages = (leaderBoard: any[]) => {
       const imageData = new Map<string, Phaser.GameObjects.Image>();
-      const imageMap: { [key: number]: number } = {
-        0: 330,
-        1: 360,
-        2: 390,
-        3: 420,
-        4: 450,
-      };
+      const basePosition = 300;
+      const increment = 30;
       leaderBoard.map((data: any, index) => {
+        const adjusted = index + 1;
         const image = this.add.image(
           (this.game.renderer.width - 500) / 2 + 120,
-          imageMap[index],
+          basePosition + increment * adjusted,
           "placeholder"
         );
         image.setDisplaySize(30, 30);
