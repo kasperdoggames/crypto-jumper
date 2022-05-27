@@ -49,6 +49,6 @@ The application is hosted on [heroku](https://www.heroku.com/) and is auto deloy
 
 ## Keeper Contract
 
-The contract address that needs to be set via `setKeeper` on P2EGame contract on a new deploy: `0x6179B349067af80D0c171f43E6d767E4A00775Cd`
+The contract address that needs to be set via `setKeeper` on P2EGame contract on a new deploy: `0x0D109DEf408375e52706dE8DC4470011C6Daf978`
 
-NFT images on ipfs: `bafybeiegqnqm4xlwsoax2ciz7qohj2djqcwjcglmrs7hysnndp73zhdkra`
+NFT images on ipfs: `bafybeifme5ivs3kv3nd5wcdsbdf52dbg3nysoty62bxanxj6z36kvlcy3y`
