@@ -10,7 +10,6 @@ export default class Dialog extends Scene {
   dialogText!: Phaser.GameObjects.Text;
   leaderboardBackground!: Phaser.GameObjects.Graphics;
   leaderboardTitle!: Phaser.GameObjects.Text;
-  leaderboardList!: Phaser.GameObjects.Text;
   addToGameBtn!: Phaser.GameObjects.Container;
 
   constructor() {
@@ -54,15 +53,6 @@ export default class Dialog extends Scene {
         fontFamily: "Splatch",
       })
       .setFontSize(20)
-      .setOrigin(0.5)
-      .setDepth(1.1)
-      .setAlpha(0);
-
-    this.leaderboardList = this.add
-      .text(screenCenterX, 360, "", {
-        fontFamily: "Splatch",
-      })
-      .setFontSize(18)
       .setOrigin(0.5)
       .setDepth(1.1)
       .setAlpha(0);
@@ -173,6 +163,17 @@ export default class Dialog extends Scene {
         image.setDisplaySize(30, 30);
         imageData.set(data.playerAddress, image);
         this.load.image(data.playerAddress, data.image);
+        this.add
+          .text(
+            (this.game.renderer.width - 500) / 2 + 160,
+            280 + increment * adjusted,
+            `${adjusted}: ${data.playerAddress} : ${data.count}`,
+            {
+              fontFamily: "Splatch",
+            }
+          )
+          .setFontSize(18)
+          .setDepth(1.1);
       });
 
       this.load.once("complete", () => {
@@ -200,11 +201,6 @@ export default class Dialog extends Scene {
       this.dialogBackground.setAlpha(0);
       this.leaderboardBackground.setAlpha(1);
       this.leaderboardTitle.setText("Leaderboard").setAlpha(1);
-      const output = leaderBoard.map(
-        (playerData, index) =>
-          `${index + 1}: ${playerData.playerAddress} ${playerData.count}`
-      );
-      this.leaderboardList.setText(output.join("\n")).setAlpha(1);
     });
 
     events.on(
