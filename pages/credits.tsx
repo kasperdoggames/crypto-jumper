@@ -18,8 +18,8 @@ const Credits: NextPage = () => {
               <p className="text-4xl text-center text-white font-koalafamily">
                 Thanks to the following:
               </p>
-              <div className="w-full lg:w-2/3 p-8">
-                <div className="grid grid-cols-2 gap-6 text-white text-xs lg:text-sm">
+              <div className="w-full p-8 lg:w-2/3">
+                <div className="grid grid-cols-2 gap-6 text-xs text-white lg:text-sm">
                   <div className="text-center text-indigo-500">
                     <p>Lava Level Artwork</p>
                   </div>
@@ -62,6 +62,17 @@ const Credits: NextPage = () => {
                       href="https://freesound.org/people/daytripper/sounds/73678/"
                     >
                       daytripper
+                    </a>
+                  </div>
+                  <div className="text-center text-indigo-500">
+                    <p>NFT Image Generator</p>
+                  </div>
+                  <div className="text-center">
+                    <a
+                      className="hover:text-gray-400"
+                      href="https://github.com/HashLips"
+                    >
+                      HashLips Art Engine
                     </a>
                   </div>
                 </div>
