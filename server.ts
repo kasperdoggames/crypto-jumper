@@ -3,10 +3,15 @@ import next from "next";
 import { Server } from "socket.io";
 import http from "http";
 import { v4 as uuidv4 } from "uuid";
-import { P2EGAME_CONTRACT_ADDRESS } from "./support/contract_addresses";
+import {
+  P2EGAME_CONTRACT_ADDRESS,
+  GAMENFTTOKEN_CONTRACT_ADDRESS,
+} from "./support/contract_addresses";
 import P2EGameJson from "./support/P2EGame.json";
+import GameNFTTokenJson from "./support/GameNFTToken.json";
 import { BigNumber, BytesLike, ethers } from "ethers";
 import forceSsl from "./support/forceSsl";
+import { toIpfsGatewayURL } from "./support/eth";
 
 const dev = process.env.NODE_ENV !== "production";
 const nextApp = next({ dev });
@@ -34,10 +39,11 @@ interface PlayerUpdateData {
 }
 
 nextApp.prepare().then(() => {
+  const providerUrl =
+    "https://polygon-mumbai.g.alchemy.com/v2/A0ILlbpO9xF7SXsx642ICtBfn8hQkZBK";
+
   const getP2EGameContract = () => {
-    const provider = new ethers.providers.JsonRpcProvider(
-      "https://polygon-mumbai.g.alchemy.com/v2/A0ILlbpO9xF7SXsx642ICtBfn8hQkZBK"
-    );
+    const provider = new ethers.providers.JsonRpcProvider(providerUrl);
     const SIGNER_WALLET_KEY: BytesLike = process.env.SIGNER_WALLET_KEY || "";
     const signer = new ethers.Wallet(
       new ethers.utils.SigningKey(SIGNER_WALLET_KEY),
@@ -49,6 +55,21 @@ nextApp.prepare().then(() => {
       signer
     );
     return p2eGameContract;
+  };
+
+  const getGameNFTTokenContract = () => {
+    const provider = new ethers.providers.JsonRpcProvider(providerUrl);
+    const SIGNER_WALLET_KEY: BytesLike = process.env.SIGNER_WALLET_KEY || "";
+    const signer = new ethers.Wallet(
+      new ethers.utils.SigningKey(SIGNER_WALLET_KEY),
+      provider
+    );
+    const gameNFTTokenContract = new ethers.Contract(
+      GAMENFTTOKEN_CONTRACT_ADDRESS,
+      GameNFTTokenJson.abi,
+      signer
+    );
+    return gameNFTTokenContract;
   };
 
   const app: Express = express();
@@ -74,7 +95,7 @@ nextApp.prepare().then(() => {
     { room: string; walletAddress?: string }
   >();
 
-  const leaderboad = new Map<string, number>();
+  const leaderboad = new Map<string, { image: string; count: number }>();
 
   type GameSates = "Begin" | "New" | "Started" | "Finished";
 
@@ -137,6 +158,22 @@ nextApp.prepare().then(() => {
     });
   };
 
+  const getNftImage = async (account: string) => {
+    const gameNFTTokenContract = getGameNFTTokenContract();
+    if (gameNFTTokenContract) {
+      const nftTokens = await gameNFTTokenContract.walletOfOwner(account);
+      if (nftTokens > 0) {
+        const tokenId = nftTokens[0];
+        const tokenJsonString = await gameNFTTokenContract.tokenURI(tokenId);
+        const nftMetadata = toIpfsGatewayURL(tokenJsonString);
+        const response = await fetch(nftMetadata);
+        const imageData = await response.json();
+        const image = toIpfsGatewayURL(imageData.image);
+        return image;
+      }
+    }
+  };
+
   const getWinners = async () => {
     if (p2eGameContract) {
       console.log("getWinners!!!!");
@@ -155,14 +192,13 @@ nextApp.prepare().then(() => {
         acc[address] = (acc[address] || 0) + 1;
         return acc;
       }, {});
-
-      const sorted = Object.entries(aggregated).sort(
-        ([, a]: any, [, b]: any) => b - a
-      );
-
-      Object.entries(aggregated).map((item) => {
-        leaderboad.set(item[0], Number(item[1]));
-      });
+      for (const item of Object.entries(aggregated)) {
+        const image = await getNftImage(item[0]);
+        leaderboad.set(item[0], {
+          image: image ? image : "",
+          count: Number(item[1]),
+        });
+      }
     }
   };
 
@@ -205,7 +241,7 @@ nextApp.prepare().then(() => {
           roomSet = roomSet === "lava" ? "construction" : "lava";
         }
         const leaderBoardData = Array.from(leaderboad).sort(
-          ([, a], [, b]) => b - a
+          ([, a], [, b]) => b.count - a.count
         );
         const top5 = leaderBoardData ? leaderBoardData.slice(0, 5) : [];
         const top5AddressSliced = top5.map((item) => ({
@@ -213,7 +249,8 @@ nextApp.prepare().then(() => {
             item[0].length - 4,
             item[0].length
           )}`,
-          count: item[1],
+          image: item[1].image,
+          count: item[1].count,
         }));
         console.log("emitting: ", { leaderBoard: top5AddressSliced });
         io.emit("gameEnd", { leaderBoard: top5AddressSliced });
@@ -373,11 +410,15 @@ nextApp.prepare().then(() => {
           if (gameData.winner) {
             try {
               // add to leaderboard local cache
-              const existingLeaderboadPlayerCount = leaderboad.get(wallet);
-              if (existingLeaderboadPlayerCount) {
-                leaderboad.set(wallet, existingLeaderboadPlayerCount + 1);
+              const existingLeaderboadPlayerData = leaderboad.get(wallet);
+              if (existingLeaderboadPlayerData) {
+                leaderboad.set(wallet, {
+                  ...existingLeaderboadPlayerData,
+                  count: existingLeaderboadPlayerData.count + 1,
+                });
               } else {
-                leaderboad.set(wallet, 1);
+                const image = await getNftImage(wallet);
+                leaderboad.set(wallet, { image: image ? image : "", count: 1 });
               }
               const tx = await p2eGameContract.playerWon(wallet, currentGameId);
               await tx.wait();

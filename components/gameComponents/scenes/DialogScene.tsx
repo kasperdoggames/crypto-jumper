@@ -24,6 +24,7 @@ export default class Dialog extends Scene {
     this.load.image("button1", "assets/ui/blue_button01.png");
     this.load.image("button2", "assets/ui/blue_button02.png");
     this.load.image("button3", "assets/ui/blue_button03.png");
+    this.load.image("placeholder", "assets/placeholder.png");
   }
 
   create() {
@@ -158,9 +159,45 @@ export default class Dialog extends Scene {
       }
     });
 
+    const loadImages = (leaderBoard: any[]) => {
+      const imageData = new Map<string, Phaser.GameObjects.Image>();
+      const imageMap: { [key: number]: number } = {
+        0: 330,
+        1: 360,
+        2: 390,
+        3: 420,
+        4: 450,
+      };
+      leaderBoard.map((data: any, index) => {
+        const image = this.add.image(
+          (this.game.renderer.width - 500) / 2 + 120,
+          imageMap[index],
+          "placeholder"
+        );
+        image.setDisplaySize(30, 30);
+        imageData.set(data.playerAddress, image);
+        this.load.image(data.playerAddress, data.image);
+      });
+
+      this.load.once("complete", () => {
+        // texture loaded so use instead of the placeholder
+        console.log("image loaded!");
+        imageData.forEach((image, key) => {
+          image.setTexture(key);
+        });
+      });
+
+      this.load.once("loadError", (data: any) => {
+        console.log("err: ", { data });
+      });
+
+      this.load.start();
+    };
+
     events.on("leaderBoard", (gameData: { leaderBoard: any[] }) => {
       console.log("leaderBoard: ", { gameData });
       const { leaderBoard } = gameData;
+      loadImages(leaderBoard);
       this.addToGameBtn.setAlpha(0);
       this.dialogTitle.setAlpha(0);
       this.dialogText.setAlpha(0);
